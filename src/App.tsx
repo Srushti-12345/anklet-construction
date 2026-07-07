@@ -1360,7 +1360,7 @@ export default function App() {
                         challenge: "Highly corrosive maritime sea breeze, loose silty mud soil requiring extensive piling.",
                         solution: "Implemented 12-meter deep underground friction concrete piles. Sourced specialized moisture-resistant concrete with corrosion-inhibiting steel coatings.",
                         metric: "Completed 22 Days Ahead of Schedule",
-                        bg: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600"
+                        bg: suryaHeritageVilla
                       },
                       {
                         title: "Viraaj Corporate HQ High-Rise",
@@ -1368,7 +1368,7 @@ export default function App() {
                         challenge: "Severe logistical constraints on concrete mixers, highly crowded transit zones.",
                         solution: "Managed just-in-time delivery scheduling using our automated Gantt models. Conducted pre-stressed column slab casting at night to bypass transit congestion.",
                         metric: "Zero Safety Incidents Over 240,000 Hours",
-                        bg: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600"
+                        bg: viraajCorporatePlaza
                       }
                     ].map((caseStudy, idx) => (
                       <div key={idx} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-150 dark:border-slate-700/50 shadow-sm overflow-hidden flex flex-col justify-between">
