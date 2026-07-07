@@ -135,9 +135,9 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-14" id="contact-panel-wrapper">
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 xl:gap-10" id="contact-panel-wrapper">
       {/* LEFT COLUMN: Premium Active Inquiry Forms */}
-      <div className="lg:col-span-7 xl:col-span-8 bg-white dark:bg-slate-800 rounded-3xl p-7 sm:p-10 lg:p-12 shadow-xl border border-gray-100 dark:border-slate-700/60">
+      <div className="xl:col-span-7 bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 shadow-xl border border-gray-100 dark:border-slate-700/60">
         
         {/* Tab Header Selector */}
         <div className="flex border-b border-gray-100 dark:border-slate-700 pb-4 mb-8">
@@ -453,8 +453,8 @@ export const ContactForm: React.FC<ContactFormProps> = ({
       </div>
 
       {/* RIGHT COLUMN: Contact Details & Google Map */}
-      <div className="lg:col-span-5 xl:col-span-4 space-y-8 flex flex-col justify-between">
-        <div className="bg-brand-navy text-white rounded-3xl p-6 sm:p-7 lg:p-8 xl:p-9 shadow-xl space-y-5 lg:space-y-6 flex-grow">
+      <div className="xl:col-span-5 space-y-6 lg:space-y-7 flex flex-col justify-between">
+        <div className="bg-brand-navy text-white rounded-3xl p-6 sm:p-7 lg:p-8 xl:p-10 shadow-xl space-y-5 lg:space-y-6 flex-grow">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
               Corporate Office
@@ -536,14 +536,14 @@ export const ContactForm: React.FC<ContactFormProps> = ({
         </div>
 
         {/* GOOGLE MAP IFRAME CONTAINER */}
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-xl overflow-hidden h-[250px]">
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-xl overflow-hidden h-[280px] sm:h-[320px] lg:h-[360px]">
           <iframe
             title="ANKLET Headquarters location map"
-            src="https://maps.google.com/maps?q=Bharsingi,%20Nagpur,%20Maharashtra&t=&z=14&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=Near%20Gajanan%20Maharaj%20Temple,%20Bharsingi,%20Narkhed,%20Nagpur,%20Maharashtra%20441301&t=&z=15&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="100%"
             style={{ border: 0, borderRadius: "1.2rem" }}
-            allowFullScreen={false}
+            allowFullScreen={true}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
