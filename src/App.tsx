@@ -1,18 +1,18 @@
 import React from "react";
-import suryaHeritageVilla from "../assets/Surya Heritage Villa.jpeg";
-import viraajCorporatePlaza from "../assets/Viraaj Corporate Plaza.jpeg";
-import saarthExpresswayCorridor from "../assets/Saarth Expressway Corridor.jpeg";
 import { Navbar } from "./components/Navbar";
 import { ServicesGrid } from "./components/ServicesGrid";
 import { BOQEstimator } from "./components/BOQEstimator";
 import { GanttSimulator } from "./components/GanttSimulator";
 import { MeetingScheduler } from "./components/MeetingScheduler";
 import { ProjectsPortfolio } from "./components/ProjectsPortfolio";
+import { AdminAuth } from "./components/AdminAuth";
+import { AdminDashboard } from "./components/AdminDashboard";
 import { Timeline } from "./components/Timeline";
 import { TestimonialsCarousel } from "./components/TestimonialsCarousel";
 import { StatsSection } from "./components/StatsSection";
 import { ContactForm } from "./components/ContactForm";
 import { AnkletLogo } from "./components/AnkletLogo";
+import { isAdminAuthenticated } from "./admin/adminStorage";
 import { WHY_CHOOSE_US } from "./data";
 import { 
   Shield, 
@@ -39,6 +39,10 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+const suryaHeritageVilla = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200";
+const viraajCorporatePlaza = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200";
+const saarthExpresswayCorridor = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200";
+
 // Helper for why choose us icon resolving
 const WhyUsIcon = ({ name, className }: { name: string; className: string }) => {
   switch (name) {
@@ -64,9 +68,25 @@ const WhyUsIcon = ({ name, className }: { name: string; className: string }) => 
 export default function App() {
   const [activeView, setActiveView] = React.useState<string>("home");
   const [contactTab, setContactTab] = React.useState<"quote" | "consult">("quote");
+  const [currentPath, setCurrentPath] = React.useState(() => window.location.pathname);
   const primaryPhoneNumber = "+917414938354";
   const primaryWhatsappNumber = "917414938354";
   const secondaryPhoneNumber = "+917219855366";
+
+  React.useEffect(() => {
+    const syncPath = () => setCurrentPath(window.location.pathname);
+
+    window.addEventListener("popstate", syncPath);
+    return () => window.removeEventListener("popstate", syncPath);
+  }, []);
+
+  const navigateTo = (path: string) => {
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, "", path);
+    }
+
+    setCurrentPath(path);
+  };
 
   // Reusable Page Header for subpages with clean, elegant layout
   const SubpageHeader = ({ 
@@ -143,6 +163,27 @@ export default function App() {
       </div>
     );
   };
+
+  if (currentPath.startsWith("/admin")) {
+    const isLoginRoute = currentPath === "/admin/login";
+    const isSignupRoute = currentPath === "/admin/signup";
+    const isDashboardRoute =
+      currentPath === "/admin" ||
+      currentPath === "/admin/dashboard" ||
+      currentPath === "/admin/dashboard/quotes" ||
+      currentPath === "/admin/dashboard/consultations" ||
+      currentPath === "/admin/dashboard/callbacks";
+
+    if (isLoginRoute || isSignupRoute) {
+      return <AdminAuth initialMode={isSignupRoute ? "signup" : "login"} onNavigate={navigateTo} />;
+    }
+
+    if (isDashboardRoute && isAdminAuthenticated()) {
+      return <AdminDashboard onNavigate={navigateTo} />;
+    }
+
+    return <AdminAuth initialMode="login" onNavigate={navigateTo} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans selection:bg-brand-orange selection:text-white flex flex-col justify-between">
@@ -943,7 +984,6 @@ export default function App() {
                       <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed">
                         We minimize waste and structural collisions before a single brick is laid. By simulating physical force calculations on complex CAD software, our field engineers execute projects with supreme surgical accuracy.
                       </p>
-
                       <div className="space-y-4">
                         {[
                           {

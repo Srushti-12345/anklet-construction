@@ -65,3 +65,14 @@ export interface ConsultationRequest {
   message: string;
   submittedAt: string;
 }
+
+export interface CallbackRequest {
+  id: string;
+  name: string;
+  phone: string;
+  focusArea: string;
+  consultantName: string;
+  preferredDate: string;
+  timeSlot: string;
+  submittedAt: string;
+}
