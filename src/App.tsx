@@ -732,7 +732,7 @@ export default function App() {
               </section>
 
               {/* STATUTORY LICENSING & REGULATORY COMPLIANCE */}
-              <section className="py-16 bg-slate-50 dark:bg-slate-900 border-t border-b border-gray-150/10">
+              <section className="py-16 bg-white dark:bg-slate-950">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange bg-orange-500/10 px-3 py-1 rounded-full inline-block">
@@ -1360,7 +1360,7 @@ export default function App() {
                         challenge: "Highly corrosive maritime sea breeze, loose silty mud soil requiring extensive piling.",
                         solution: "Implemented 12-meter deep underground friction concrete piles. Sourced specialized moisture-resistant concrete with corrosion-inhibiting steel coatings.",
                         metric: "Completed 22 Days Ahead of Schedule",
-                        bg: suryaHeritageVilla
+                        bg: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600"
                       },
                       {
                         title: "Viraaj Corporate HQ High-Rise",
@@ -1368,7 +1368,7 @@ export default function App() {
                         challenge: "Severe logistical constraints on concrete mixers, highly crowded transit zones.",
                         solution: "Managed just-in-time delivery scheduling using our automated Gantt models. Conducted pre-stressed column slab casting at night to bypass transit congestion.",
                         metric: "Zero Safety Incidents Over 240,000 Hours",
-                        bg: viraajCorporatePlaza
+                        bg: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600"
                       }
                     ].map((caseStudy, idx) => (
                       <div key={idx} className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-150 dark:border-slate-700/50 shadow-sm overflow-hidden flex flex-col justify-between">
