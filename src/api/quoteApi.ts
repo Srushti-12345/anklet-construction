@@ -1,0 +1,5 @@
+import api from "./api";
+
+export const submitQuoteRequest = (data: any) => {
+    return api.post("/quote-requests", data);
+};
