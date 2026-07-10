@@ -174,7 +174,12 @@ export const clearAdminSession = () => {
   window.localStorage.removeItem(ADMIN_SESSION_KEY);
 };
 
-export const isAdminAuthenticated = () => Boolean(getAdminSession());
+export const isAdminAuthenticated = () => {
+  return (
+    !!localStorage.getItem("token") &&
+    !!localStorage.getItem("admin")
+  );
+};
 
 export const signupAdmin = ({ name, email, password }: { name: string; email: string; password: string; }) => {
   const accounts = getAdminAccounts();
@@ -214,13 +219,15 @@ export const loginAdmin = ({ email, password }: { email: string; password: strin
     name: account.name,
     email: account.email,
     signedInAt: new Date().toISOString(),
+    
   });
 
   return { ok: true as const, account };
 };
 
 export const logoutAdmin = () => {
-  clearAdminSession();
+  localStorage.removeItem("token");
+  localStorage.removeItem("admin");
 };
 
 export const getQuoteRequests = () => {

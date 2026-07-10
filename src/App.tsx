@@ -81,11 +81,13 @@ export default function App() {
   }, []);
 
   const navigateTo = (path: string) => {
+    console.log("Navigating to:", path);
     if (window.location.pathname !== path) {
       window.history.pushState({}, "", path);
     }
 
     setCurrentPath(path);
+    console.log("Current URL:", window.location.pathname);
   };
 
   // Reusable Page Header for subpages with clean, elegant layout

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Calendar, Clock, Video, User, BadgeAlert, Award, ShieldAlert } from "lucide-react";
+import { Clock, Video } from "lucide-react";
 import { submitTechnicalConsultation } from "../api/technicalConsultationApi";
-import { saveCallbackRequest } from "../admin/adminStorage";
 
 interface Consultant {
   name: string;
@@ -99,16 +98,6 @@ export const MeetingScheduler: React.FC = () => {
     } finally {
       setBookingLoading(false);
     }
-    saveCallbackRequest({
-      id: "CB-" + Math.floor(100000 + Math.random() * 900000),
-      name: clientName,
-      phone: clientPhone,
-      focusArea: matchedConsultant.role,
-      consultantName: matchedConsultant.name,
-      preferredDate: date,
-      timeSlot: time,
-      submittedAt: new Date().toISOString(),
-    });
 
     setIsBooked(true);
   };
