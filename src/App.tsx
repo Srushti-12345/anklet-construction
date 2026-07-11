@@ -68,6 +68,7 @@ const WhyUsIcon = ({ name, className }: { name: string; className: string }) => 
 export default function App() {
   const [activeView, setActiveView] = React.useState<string>("home");
   const [contactTab, setContactTab] = React.useState<"quote" | "consult">("quote");
+  const [contactProjectType, setContactProjectType] = React.useState<string | undefined>(undefined);
   const [currentPath, setCurrentPath] = React.useState(() => window.location.pathname);
   const primaryPhoneNumber = "+917414938354";
   const primaryWhatsappNumber = "917414938354";
@@ -78,6 +79,23 @@ export default function App() {
 
     window.addEventListener("popstate", syncPath);
     return () => window.removeEventListener("popstate", syncPath);
+  }, []);
+
+  // Global handler: allow other components to request navigation to contact
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail || {};
+      const tab = detail.tab === "consult" ? "consult" : "quote";
+      const projectType = typeof detail.projectType === "string" ? detail.projectType : undefined;
+
+      setContactTab(tab);
+      setContactProjectType(projectType);
+      setActiveView("contact");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.addEventListener("anklet-set-contact-tab", handler as EventListener);
+    return () => window.removeEventListener("anklet-set-contact-tab", handler as EventListener);
   }, []);
 
   const navigateTo = (path: string) => {
@@ -1421,7 +1439,7 @@ export default function App() {
                 </div>
 
                 <div className="w-full">
-                  <ContactForm activeTab={contactTab} setActiveTab={setContactTab} />
+                  <ContactForm activeTab={contactTab} setActiveTab={setContactTab} projectType={contactProjectType} />
                 </div>
               </section>
 

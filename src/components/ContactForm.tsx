@@ -6,9 +6,7 @@ import {
   Clock, 
   Send, 
   CheckCircle, 
-  Linkedin, 
   Facebook, 
-  Twitter, 
   Instagram, 
   CalendarDays,
   FileText,
@@ -20,11 +18,13 @@ import { QuoteRequest, ConsultationRequest } from "../types";
 interface ContactFormProps {
   activeTab?: "quote" | "consult";
   setActiveTab?: (tab: "quote" | "consult") => void;
+  projectType?: string;
 }
 
 export const ContactForm: React.FC<ContactFormProps> = ({
   activeTab: controlledActiveTab,
-  setActiveTab: controlledSetActiveTab
+  setActiveTab: controlledSetActiveTab,
+  projectType
 }) => {
   const [localActiveTab, setLocalActiveTab] = useState<"quote" | "consult">("quote");
   
@@ -61,6 +61,12 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     if (quotes) setSavedQuotes(JSON.parse(quotes));
     if (consults) setSavedConsults(JSON.parse(consults));
   }, []);
+
+  useEffect(() => {
+    if (projectType && activeTab === "quote") {
+      setQuoteType(projectType);
+    }
+  }, [projectType, activeTab]);
 
   const handleQuoteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -519,16 +525,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           <div className="pt-6 border-t border-white/10">
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-3">Follow Brand Portals</p>
             <div className="flex gap-3">
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
-                <Linkedin className="w-4 h-4 text-white" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
-                <Twitter className="w-4 h-4 text-white" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
+              <a href="https://www.facebook.com/share/1LZ1jaKwE3/" target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
                 <Facebook className="w-4 h-4 text-white" />
               </a>
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
+              <a href="https://www.instagram.com/ankletconstruction?igsh=MXN3dHc3YzUxcGF6dg==" target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
                 <Instagram className="w-4 h-4 text-white" />
               </a>
             </div>
