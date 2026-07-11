@@ -6,9 +6,7 @@ import {
   Clock, 
   Send, 
   CheckCircle, 
-  Linkedin, 
   Facebook, 
-  Twitter, 
   Instagram, 
   CalendarDays,
   FileText,
@@ -61,6 +59,39 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     if (quotes) setSavedQuotes(JSON.parse(quotes));
     if (consults) setSavedConsults(JSON.parse(consults));
   }, []);
+
+  // Listen for external requests to open the contact panel and switch tabs
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail || {};
+      const tab = detail.tab === "consult" ? "consult" : "quote";
+      const projectType = detail.projectType;
+      setActiveTab(tab);
+      if (projectType && tab === "quote") setQuoteType(projectType);
+
+      const el = document.getElementById("contact-panel-wrapper") || document.getElementById("contact");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    };
+
+    window.addEventListener("anklet-set-contact-tab", handler as EventListener);
+    return () => window.removeEventListener("anklet-set-contact-tab", handler as EventListener);
+  }, [setActiveTab]);
+
+  // Fallback: respond to URL hash navigation (e.g., #contact-panel-wrapper)
+  useEffect(() => {
+    const onHash = () => {
+      if (window.location.hash && window.location.hash.includes("contact")) {
+        setActiveTab("quote");
+        const el = document.getElementById("contact-panel-wrapper") || document.getElementById("contact");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    window.addEventListener("hashchange", onHash);
+    // run once on mount in case URL already contains hash
+    onHash();
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [setActiveTab]);
 
   const handleQuoteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -519,16 +550,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           <div className="pt-6 border-t border-white/10">
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-3">Follow Brand Portals</p>
             <div className="flex gap-3">
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
-                <Linkedin className="w-4 h-4 text-white" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
-                <Twitter className="w-4 h-4 text-white" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
+              <a href="https://www.facebook.com/share/1LZ1jaKwE3/" target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
                 <Facebook className="w-4 h-4 text-white" />
               </a>
-              <a href="#" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
+              <a href="https://www.instagram.com/ankletconstruction?igsh=MXN3dHc3YzUxcGF6dg==" target="_blank" rel="noopener noreferrer" className="bg-white/10 hover:bg-brand-orange p-3 rounded-xl transition-all duration-200">
                 <Instagram className="w-4 h-4 text-white" />
               </a>
             </div>

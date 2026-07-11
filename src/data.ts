@@ -5,6 +5,7 @@ import saarthExpresswayCorridor from "../assets/Saarth Expressway Corridor.jpeg"
 import shriyanCulturalPavilion from "../assets/Shriyan Cultural Pavilion.jpeg";
 import aaravExecutiveSuites from "../assets/Aarav Executive Suites.jpeg";
 import nilayaCanopyResidences from "../assets/Nilaya Canopy Residences.jpeg";
+import agriculturalInfra from "../assets/agricultural_infra.webp";
 
 export const SERVICES_DATA: Service[] = [
   {
@@ -118,6 +119,25 @@ export const SERVICES_DATA: Service[] = [
     ],
     imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800",
     iconName: "Wrench"
+  }
+  ,
+  {
+    id: "agricultural-infrastructure",
+    title: "Agricultural Infrastructure",
+    subtitle: "Farm Roads, Irrigation, Storage & Farm Structures",
+    description: "Comprehensive agricultural infrastructure solutions to improve farm productivity, water management, and on-farm logistics. We deliver civil works tailored for agricultural operations with durable, low-maintenance construction.",
+    detailedPoints: [
+      "Farm Roads & Internal Roads",
+      "Irrigation Canal Construction",
+      "Water Storage Tanks & Reservoirs",
+      "Land Development & Earthwork",
+      "Farm Sheds & Warehouses",
+      "Drainage Systems",
+      "Boundary Walls & Fencing",
+      "Greenhouse & Polyhouse Structures"
+    ],
+    imageUrl: agriculturalInfra,
+    iconName: "Home"
   }
 ];
 
