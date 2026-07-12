@@ -5,6 +5,7 @@ interface AnkletLogoProps {
   showText?: boolean;
   lightText?: boolean; // If true, make the auxiliary text white/slate for dark backgrounds
   height?: number | string;
+  align?: "center" | "left";
 }
 
 export const AnkletLogo: React.FC<AnkletLogoProps> = ({
@@ -12,6 +13,7 @@ export const AnkletLogo: React.FC<AnkletLogoProps> = ({
   showText = true,
   lightText = false,
   height = 64,
+  align = "center",
 }) => {
   const navyColor = "#000000";
   const orangeColor = "#F97316";
@@ -26,7 +28,7 @@ export const AnkletLogo: React.FC<AnkletLogoProps> = ({
 
   return (
     <div 
-      className={`flex flex-col items-center justify-center text-center select-none ${className}`}
+      className={`flex flex-col justify-center select-none ${align === "left" ? "items-start text-left" : "items-center text-center"} ${className}`}
       style={{ height: parsedHeight }}
     >
       {/* Precision Vector SVG Logo Icon */}
@@ -173,7 +175,7 @@ export const AnkletLogo: React.FC<AnkletLogoProps> = ({
 
       {/* --- BRAND TYPOGRAPHY --- */}
       {showText && (
-        <div className="flex flex-col items-center select-none mt-1 leading-none">
+        <div className={`flex flex-col select-none mt-1 leading-none ${align === "left" ? "items-start" : "items-center"}`}>
           <span
             className="text-[11px] sm:text-[12px] xl:text-[13px] font-black tracking-[0.25em] leading-none font-display"
             style={{ color: textPrimary }}

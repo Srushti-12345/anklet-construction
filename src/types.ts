@@ -53,6 +53,7 @@ export interface QuoteRequest {
   budget: string;
   message: string;
   submittedAt: string;
+  status?: "new" | "contacted" | "completed" | "closed";
 }
 
 export interface ConsultationRequest {
@@ -64,6 +65,7 @@ export interface ConsultationRequest {
   timeSlot: string;
   message: string;
   submittedAt: string;
+  status?: "new" | "contacted" | "completed" | "closed";
 }
 
 export interface CallbackRequest {
@@ -75,4 +77,5 @@ export interface CallbackRequest {
   preferredDate: string;
   timeSlot: string;
   submittedAt: string;
+  status?: "new" | "contacted" | "completed" | "closed";
 }

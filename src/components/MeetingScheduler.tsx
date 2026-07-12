@@ -85,7 +85,7 @@ export const MeetingScheduler: React.FC = () => {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-150 dark:border-slate-800 shadow-sm overflow-hidden" id="meeting-scheduler">
       <div className="p-6 bg-brand-navy text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_14px]" />
+        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[14px_14px]" />
         
         <div className="relative z-10 flex items-center gap-3">
           <div className="p-2.5 bg-brand-orange text-white rounded-xl">
