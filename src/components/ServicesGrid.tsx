@@ -65,17 +65,42 @@ export const ServicesGrid: React.FC = () => {
     }
   };
 
-  const handleInquire = (serviceTitle: string) => {
+  const handleInquire = (serviceTitle: string, tab: "quote" | "consult" = "quote") => {
+    // Close the modal first so the overlay can unmount (AnimatePresence exit animation)
     setSelectedService(null);
-    const element = document.getElementById("contact");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      // Pre-fill input value if possible (or trigger prompt)
+
+    // Wait for the modal exit animation to finish before scrolling/dispatching
+    const WAIT_MS = 550; // matches modal transition duration (500ms) plus small buffer
+    setTimeout(() => {
+      // Ensure URL hash points to contact as a robust fallback (browser will jump)
+      try {
+        window.location.hash = "#contact-panel-wrapper";
+      } catch (e) {
+        // ignore
+      }
+
+      // Try to find known contact anchors and scroll to them
+      const contactEl = document.getElementById("contact-panel-wrapper") || document.getElementById("contact");
+      if (contactEl) {
+        contactEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // Pre-fill project type select if present
       const input = document.getElementById("quote-project-type") as HTMLSelectElement;
       if (input) {
         input.value = serviceTitle;
+        // trigger change event if needed
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       }
-    }
+
+      // Dispatch a custom event so the ContactForm can switch tabs or prefill state
+      try {
+        const evt = new CustomEvent("anklet-set-contact-tab", { detail: { tab: tab, projectType: serviceTitle } });
+        window.dispatchEvent(evt);
+      } catch (e) {
+        // noop
+      }
+    }, WAIT_MS);
   };
 
   return (

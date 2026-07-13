@@ -5,6 +5,10 @@ import saarthExpresswayCorridor from "../assets/Saarth Expressway Corridor.jpeg"
 import shriyanCulturalPavilion from "../assets/Shriyan Cultural Pavilion.jpeg";
 import aaravExecutiveSuites from "../assets/Aarav Executive Suites.jpeg";
 import nilayaCanopyResidences from "../assets/Nilaya Canopy Residences.jpeg";
+import vikramMalhotraImg from "../assets/vikram-malhotra.avif";
+import sonalDeshmukhImg from "../assets/sonal-deshmukh.jpg";
+import rajeshGoelImg from "../assets/rajesh-goel.jpg";
+import agriculturalInfra from "../assets/agricultural_infra.webp";
 
 export const SERVICES_DATA: Service[] = [
   {
@@ -118,6 +122,25 @@ export const SERVICES_DATA: Service[] = [
     ],
     imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800",
     iconName: "Wrench"
+  }
+  ,
+  {
+    id: "agricultural-infrastructure",
+    title: "Agricultural Infrastructure",
+    subtitle: "Farm Roads, Irrigation, Storage & Farm Structures",
+    description: "Comprehensive agricultural infrastructure solutions to improve farm productivity, water management, and on-farm logistics. We deliver civil works tailored for agricultural operations with durable, low-maintenance construction.",
+    detailedPoints: [
+      "Farm Roads & Internal Roads",
+      "Irrigation Canal Construction",
+      "Water Storage Tanks & Reservoirs",
+      "Land Development & Earthwork",
+      "Farm Sheds & Warehouses",
+      "Drainage Systems",
+      "Boundary Walls & Fencing",
+      "Greenhouse & Polyhouse Structures"
+    ],
+    imageUrl: agriculturalInfra,
+    iconName: "Home"
   }
 ];
 
@@ -237,7 +260,7 @@ export const TESTIMONIALS_DATA: Testimonial[] = [
     company: "Aether Capital Group",
     content: "Working with ANKLET on our corporate headquarters was an absolute revelation. They delivered a complex, 12-story high-tech building on BKC 2 weeks ahead of our aggressive schedule. Their transparency and engineering precision are unmatched in the Indian market. Highly recommended for premium corporate assets.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200"
+    imageUrl: vikramMalhotraImg
   },
   {
     id: "test-2",
@@ -246,7 +269,7 @@ export const TESTIMONIALS_DATA: Testimonial[] = [
     company: "Deshmukh & Associates",
     content: "As an architect, finding a general builder who respects the micro-details of a complex layout is incredibly rare. ANKLET's engineering team executed our parametric structural designs with complete mathematical precision. Their structural concrete pours and finishes were perfect on first delivery.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200"
+    imageUrl: sonalDeshmukhImg
   },
   {
     id: "test-3",
@@ -255,7 +278,7 @@ export const TESTIMONIALS_DATA: Testimonial[] = [
     company: "National Highway Developers Ltd",
     content: "The heavy infrastructure division at ANKLET managed our expressway bridge project with exemplary professionalism. From rapid soil stabilization to prestressed girder installation under severe weather, their safety protocols, technical consultancy, and execution speed set a gold standard.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200"
+    imageUrl: rajeshGoelImg
   }
 ];
 

@@ -122,58 +122,72 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.12),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.12),transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)]" />
-      <div className="absolute inset-0 opacity-30 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-size-[48px_48px]" />
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.14),transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] text-slate-900">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:44px_44px] opacity-45" />
+      <div className="absolute -top-24 right-2 hidden h-80 w-80 rounded-full bg-brand-orange/10 blur-3xl xl:block" />
+      <div className="absolute bottom-0 left-0 hidden h-96 w-96 rounded-full bg-slate-900/10 blur-3xl xl:block" />
 
-      <div className="absolute -top-12 right-8 hidden xl:block w-72 h-72 rounded-full bg-brand-orange/10 blur-3xl" />
-      <div className="absolute bottom-4 left-0 hidden xl:block w-80 h-80 rounded-full bg-sky-500/10 blur-3xl" />
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+        <div className="grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white/85 shadow-[0_30px_100px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:grid-cols-[0.95fr_1.05fr]">
+          <section className="relative overflow-hidden bg-[linear-gradient(160deg,#0f172a_0%,#111827_55%,#F97316_175%)] px-7 py-10 text-white sm:px-10 sm:py-12">
+            <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.24),transparent_32%)]" />
+            <div className="relative z-10 flex h-full flex-col justify-between gap-10">
+              <div className="space-y-5">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-white/85">
+                  <Sparkles className="h-4 w-4" />
+                  Protected Admin Access
+                </div>
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-10 sm:py-14">
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-          <section className="lg:col-span-5 rounded-[2rem] border border-slate-200 bg-white/85 backdrop-blur-xl p-8 sm:p-10 shadow-[0_20px_60px_rgba(15,23,42,0.08)] relative overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(249,115,22,0.08),transparent_42%)] pointer-events-none" />
-
-            <div className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange/20 bg-brand-orange/10 text-brand-orange text-[10px] font-black uppercase tracking-[0.3em]">
-              <Sparkles className="w-4 h-4" />
-              Protected Admin Route
-            </div>
-
-            <div className="relative mt-6 space-y-4">
-              <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight leading-tight max-w-md text-slate-950">
-                Secure access for your response portal.
-              </h1>
-              <p className="text-sm text-slate-600 leading-relaxed max-w-md">
-                Sign in or create the first admin account to manage quote requests, consultation bookings, and the live expert workflow.
-              </p>
-            </div>
-
-            <div className="relative mt-8 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <KeyRound className="w-4 h-4 text-brand-orange" />
-                <p className="mt-3 text-xs font-black uppercase tracking-widest text-slate-400">Private Workspace</p>
-                <p className="mt-1 text-sm text-slate-700">No public sign-in entry points</p>
+                <div className="space-y-4">
+                  <h1 className="max-w-md font-display text-3xl font-black tracking-tight sm:text-4xl">
+                    Secure the admin workspace with a cleaner, sharper control surface.
+                  </h1>
+                  <p className="max-w-md text-sm leading-relaxed text-slate-200">
+                    Sign in or create the first admin account to manage quote requests, consultation bookings, and callback records from a single workspace.
+                  </p>
+                </div>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <ShieldCheck className="w-4 h-4 text-brand-orange" />
-                <p className="mt-3 text-xs font-black uppercase tracking-widest text-slate-400">Protected Session</p>
-                <p className="mt-1 text-sm text-slate-700">Route-gated admin workspace</p>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                  <KeyRound className="h-5 w-5 text-brand-orange" />
+                  <p className="mt-4 text-[10px] font-black uppercase tracking-[0.28em] text-white/55">Access Scope</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Private route for the admin team</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                  <ShieldCheck className="h-5 w-5 text-brand-orange" />
+                  <p className="mt-4 text-[10px] font-black uppercase tracking-[0.28em] text-white/55">Session State</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Session-gated dashboard access</p>
+                </div>
+              </div>
+
+              <div className="rounded-[1.75rem] border border-white/10 bg-black/15 p-5 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-orange text-white shadow-lg shadow-orange-500/20">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/55">Brand palette</p>
+                    <p className="mt-1 text-sm font-semibold text-white">Slate neutrals, warm orange, and deep charcoal</p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="lg:col-span-7 rounded-[2rem] border border-slate-200 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.09)] p-6 sm:p-8 relative overflow-hidden">
+          <section className="relative overflow-hidden bg-white px-6 py-7 sm:px-8 sm:py-8">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-orange via-amber-400 to-sky-400" />
 
-            <div className="flex flex-wrap gap-2 p-1 rounded-2xl bg-slate-100 border border-slate-200 w-fit shadow-sm">
+            <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 w-fit shadow-sm">
               <button
                 type="button"
                 onClick={() => {
                   setMode("login");
                   setError(null);
                 }}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "login" ? "bg-brand-orange text-white shadow-md shadow-orange-500/20" : "text-slate-500 hover:text-slate-900"
-                  }`}
+                className={`rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.25em] transition-all ${
+                  mode === "login" ? "bg-brand-orange text-white shadow-md shadow-orange-500/20" : "text-slate-500 hover:text-slate-900"
+                }`}
               >
                 Login
               </button>
@@ -183,11 +197,21 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                   setMode("signup");
                   setError(null);
                 }}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "signup" ? "bg-brand-orange text-white shadow-md shadow-orange-500/20" : "text-slate-500 hover:text-slate-900"
-                  }`}
+                className={`rounded-xl px-4 py-2 text-xs font-black uppercase tracking-[0.25em] transition-all ${
+                  mode === "signup" ? "bg-brand-orange text-white shadow-md shadow-orange-500/20" : "text-slate-500 hover:text-slate-900"
+                }`}
               >
                 Signup
               </button>
+            </div>
+
+            <div className="mt-6">
+              <h2 className="text-2xl font-black tracking-tight text-slate-950">
+                {mode === "login" ? "Sign in to continue" : "Create the first admin account"}
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
+                Use the same workspace style as the dashboard so the auth step feels like part of the product, not a separate experience.
+              </p>
             </div>
 
             {error && (
@@ -199,7 +223,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
             {mode === "login" ? (
               <form onSubmit={handleLogin} className="mt-6 space-y-5">
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                     Admin Email
                   </label>
                   <input
@@ -207,13 +231,13 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange focus:bg-white transition-colors"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                     placeholder="admin@company.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                     Password
                   </label>
                   <div className="relative">
@@ -222,15 +246,15 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                       required
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
-                      className="w-full px-4 py-3.5 pr-12 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange focus:bg-white transition-colors"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 pr-12 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Your password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((value) => !value)}
-                      className="absolute inset-y-0 right-0 px-4 text-slate-400 hover:text-slate-900"
+                      className="absolute inset-y-0 right-0 px-4 text-slate-400 transition-colors hover:text-slate-900"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -238,17 +262,17 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-brand-orange text-white py-3.5 rounded-2xl text-xs font-black uppercase tracking-[0.25em] hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3.5 text-xs font-black uppercase tracking-[0.28em] text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-950/10 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <LogIn className="w-4 h-4" />
+                  <LogIn className="h-4 w-4" />
                   {loading ? "Signing in..." : "Access Dashboard"}
                 </button>
               </form>
             ) : (
               <form onSubmit={handleSignup} className="mt-6 space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                       Admin Name
                     </label>
                     <input
@@ -260,13 +284,13 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                         name: e.target.value,
                       })
                       }
-                      className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange focus:bg-white transition-colors"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Operations Lead"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                       Admin Email
                     </label>
                     <input
@@ -277,15 +301,15 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                         ...signupForm,
                         email: e.target.value,
                       })}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange focus:bg-white transition-colors"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="admin@company.com"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                       Password
                     </label>
                     <input
@@ -296,13 +320,13 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                         ...signupForm,
                         password: e.target.value,
                       })}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange focus:bg-white transition-colors"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Create a password"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                       Confirm Password
                     </label>
                     <input
@@ -313,7 +337,7 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                         ...signupForm,
                         confirmPassword: e.target.value,
                       })}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange focus:bg-white transition-colors"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Repeat the password"
                     />
                   </div>
@@ -322,9 +346,9 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-brand-orange text-white py-3.5 rounded-2xl text-xs font-black uppercase tracking-[0.25em] hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3.5 text-xs font-black uppercase tracking-[0.28em] text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-950/10 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="h-4 w-4" />
                   {loading ? "Creating account..." : "Create Admin Account"}
                 </button>
               </form>
