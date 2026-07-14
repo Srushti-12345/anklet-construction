@@ -13,13 +13,13 @@ export interface AdminAccount {
 }
 
 export interface AdminSession {
-  name: string;
+  fullName: string;
   email: string;
   signedInAt: string;
 }
 
-export const ADMIN_ACCOUNTS_KEY = "anklet_admin_accounts";
-export const ADMIN_SESSION_KEY = "anklet_admin_session";
+export const ADMIN_ACCOUNTS_KEY = "accessToken";
+export const ADMIN_SESSION_KEY = "admin";
 // export const QUOTE_STORAGE_KEY = "anklet_quotes";
 // export const CONSULT_STORAGE_KEY = "anklet_consults";
 // export const CALLBACK_STORAGE_KEY = "anklet_callbacks";
@@ -125,12 +125,12 @@ export const ADMIN_SESSION_KEY = "anklet_admin_session";
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
-const RECORD_STATUSES: AdminRecordStatus[] = ["new", "contacted", "completed", "closed"];
+const RECORD_STATUSES: AdminRecordStatus[] = ["NEW", "CONTACTED", "COMPLETED", "CLOSED"];
 
 const normalizeStatus = (value: unknown): AdminRecordStatus =>
   typeof value === "string" && RECORD_STATUSES.includes(value as AdminRecordStatus)
     ? (value as AdminRecordStatus)
-    : "new";
+    : "NEW";
 
 const readJson = <T,>(key: string, fallback: T): T => {
   if (typeof window === "undefined") {
@@ -225,7 +225,7 @@ export const clearAdminSession = () => {
 
 export const isAdminAuthenticated = () => {
   return (
-    !!localStorage.getItem("token") &&
+    !!localStorage.getItem("accessToken") &&
     !!localStorage.getItem("admin")
   );
 };
@@ -265,7 +265,7 @@ export const loginAdmin = ({ email, password }: { email: string; password: strin
   }
 
   setAdminSession({
-    name: account.name,
+    fullName: account.fullName,
     email: account.email,
     signedInAt: new Date().toISOString(),
 
@@ -275,7 +275,7 @@ export const loginAdmin = ({ email, password }: { email: string; password: strin
 };
 
 export const logoutAdmin = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("accessToken");
   localStorage.removeItem("admin");
 };
 

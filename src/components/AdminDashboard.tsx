@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import { getAllQuotes } from "../api/quoteApi";
 import { getAllConsultations } from "../api/consultationApi";
 import { getAllTechnicalConsultations } from "../api/technicalConsultationApi";
+import { logout } from "../api/authApi";
 
 
 interface AdminDashboardProps {
@@ -105,6 +106,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   );
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
   const [adminSession, setAdminSession] = React.useState(() => getAdminSession());
+  console.log("Admin session:", adminSession);
   const profileMenuRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -188,10 +190,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+  try {
+    await logout(); // Calls POST /auth/logout
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    localStorage.removeItem("accessToken");
     clearAdminSession();
     onNavigate("/admin/login");
-  };
+  }
+};
 
   const updateSelectedStatus = (status: AdminRecordStatus) => {
     if (!selectedRecord) {
@@ -206,14 +215,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
     }
 
     if (selectedRecord.kind === "consultation") {
-      updateConsultationRequestStatus(selectedRecord.data.id, status);
-      setConsultRows((rows) => rows.map((row) => (row.id === selectedRecord.data.id ? { ...row, status } : row)));
+      updateConsultationRequestStatus(selectedRecord.data.consultationId, status);
+      setConsultRows((rows) => rows.map((row) => (row.id === selectedRecord.data.consultationId ? { ...row, status } : row)));
       setSelectedRecord({ kind: "consultation", data: { ...selectedRecord.data, status } });
       return;
     }
 
-    updateCallbackRequestStatus(selectedRecord.data.id, status);
-    setCallbackRows((rows) => rows.map((row) => (row.id === selectedRecord.data.id ? { ...row, status } : row)));
+    updateCallbackRequestStatus(selectedRecord.data.technicalConsultationId, status);
+    setCallbackRows((rows) => rows.map((row) => (row.id === selectedRecord.data.technicalConsultationId ? { ...row, status } : row)));
     setSelectedRecord({ kind: "callback", data: { ...selectedRecord.data, status } });
   };
 
@@ -231,11 +240,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       deleteQuoteRequest(selectedRecord.data.quoteId);
       setQuoteRows((rows) => rows.filter((row) => row.quoteId !== selectedRecord.data.quoteId));
     } else if (selectedRecord.kind === "consultation") {
-      deleteConsultationRequest(selectedRecord.data.id);
-      setConsultRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.id));
+      deleteConsultationRequest(selectedRecord.data.consultationId);
+      setConsultRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.consultationId));
     } else {
-      deleteCallbackRequest(selectedRecord.data.id);
-      setCallbackRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.id));
+      deleteCallbackRequest(selectedRecord.data.technicalConsultationId);
+      setCallbackRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.technicalConsultationId));
     }
 
     setSelectedRecord(null);
@@ -257,6 +266,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       : activePage === "consultations"
         ? "Review consultation bookings in a focused workspace built for quick triage."
         : "Manage callback requests with clear status controls and fast record access.";
+
 
   const activeCount = activeRows.length;
   const adminName = adminSession?.fullName?.trim() || "Admin";
@@ -433,8 +443,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                   <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 w-72 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
                     <div className="rounded-2xl bg-slate-50 p-4">
                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Signed In</p>
-                      <p className="mt-2 text-base font-bold text-slate-950">{adminName}</p>
-                      <p className="mt-1 wrap-break-word text-sm text-slate-500">{adminSession?.email ?? "admin"}</p>
+                      <p className="mt-2 text-base font-bold text-slate-950">{adminSession?.fullName}</p>
+                      <p className="mt-1 wrap-break-word text-sm text-slate-500">{adminSession?.email}</p>
                       <p className="mt-3 text-xs text-slate-400">
                         Session started at {adminSession?.signedInAt ? formatSubmittedAt(adminSession.signedInAt) : "unknown"}
                       </p>

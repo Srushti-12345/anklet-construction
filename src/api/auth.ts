@@ -11,8 +11,7 @@ export interface LoginRequest {
 }
 
 export interface AuthResponse {
-  token: string;
-  type: string;
+  accessToken: string;
   fullName: string;
   email: string;
   role: string;

@@ -45,9 +45,9 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
         password: loginPassword,
       });
 
-      console.log("2. Login success", response.data);
-
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem(
+        "accessToken", 
+        response.data.accessToken);
 
       localStorage.setItem(
         "admin",
@@ -55,14 +55,11 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
           fullName: response.data.fullName,
           email: response.data.email,
           role: response.data.role,
+          signedInAt: new Date().toISOString(),
         })
       );
 
-      console.log("3. Before navigate");
-
-      onNavigate("/admin/dashboard/quotes");
-
-      console.log("4. After navigate");
+      onNavigate("/admin/dashboard");
 
     } catch (error) {
       console.log("Login error", error);
