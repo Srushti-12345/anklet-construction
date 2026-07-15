@@ -6,7 +6,11 @@ const API = axios.create({
   withCredentials: true,
 });
 
-export const refreshToken = () => API.post("/refresh");
+// export const refreshToken = () => {
+//   return api.post("/refresh", {}, {
+//     withCredentials: true,
+//   });
+// };
 
 export const signup = (data: SignupRequest) =>
   API.post("/signup", data);

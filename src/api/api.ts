@@ -1,51 +1,70 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:8080/api/v1",
-    withCredentials: true,
-    headers: {
-        "Content-Type": "application/json"
-    }
+  baseURL: "http://localhost:8080/api/v1",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json"
+  }
 });
 
 api.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem("accessToken");
 
   if (accessToken) {
-    config.headers.Authorization = 
-    `Bearer ${accessToken}`;
+    config.headers.Authorization =
+      `Bearer ${accessToken}`;
   }
 
   return config;
 });
 
+const refreshToken = () => {
+  return api.post("/auth/refresh", {}, {
+    withCredentials: true
+  });
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    if (originalRequest.url?.includes("/auth/refresh")) {
+      console.log("calling refresh token");
+      return Promise.reject(error);
+    }
+    const status = error.response?.status;
 
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+    if ((status === 401 || status === 403) && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshTokenResponse = await api.post(
-        "/auth/refresh",
-        {},{
+      try {
+        const refreshTokenResponse = await api.post(
+          "/auth/refresh",
+          {}, {
           withCredentials: true
         }
-      );
+        );
 
-      localStorage.setItem(
-        "accessToken", 
-        refreshTokenResponse.data.accessToken
-      );
+        console.log("refresh token response", refreshTokenResponse);
 
-      originalRequest.headers.Authorization = 
-      `Bearer ${refreshTokenResponse.data.accessToken}`;
+        localStorage.setItem(
+          "accessToken",
+          refreshTokenResponse.data.accessToken
+        );
 
-      return api(originalRequest);
+        originalRequest.headers.Authorization =
+          `Bearer ${refreshTokenResponse.data.accessToken}`;
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("admin");
+
+        window.location.href = "/admin/login";
+        return Promise.reject(refreshError);
+      }
     }
-
-    return Promise.reject(error);
   }
 );
 

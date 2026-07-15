@@ -17,3 +17,7 @@ export const updateConsultationStatus = (
     { status }
   );
 };
+
+export const deleteConsultation = (consultationId: string) => {
+  return api.delete(`/admin/consultations/${consultationId}`);
+}

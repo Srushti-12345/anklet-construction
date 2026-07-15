@@ -17,3 +17,7 @@ export const updateCallbackStatus = (
         { status }
     );
 };
+
+export const deleteCallback = (technicalConsultationId: string) => {
+  return api.delete(`/admin/technical-consultations/${technicalConsultationId}`);
+}

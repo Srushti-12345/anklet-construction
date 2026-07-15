@@ -18,3 +18,7 @@ export const updateQuoteStatus = (
         { status }
     );
 };
+
+export const deleteQuote = (quoteId: string) => {
+  return api.delete(`/admin/quotes/${quoteId}`);
+};

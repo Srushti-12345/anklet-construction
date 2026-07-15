@@ -298,10 +298,3 @@ export const logoutAdmin = () => {
 //   const current = getCallbackRequests();
 //   writeJson(CALLBACK_STORAGE_KEY, [request, ...current]);
 // };
-
-export const deleteQuoteRequest = (id: string) => deleteRecord<QuoteRequest>(QUOTE_STORAGE_KEY, id);
-
-export const deleteConsultationRequest = (id: string) =>
-  deleteRecord<ConsultationRequest>(CONSULT_STORAGE_KEY, id);
-
-export const deleteCallbackRequest = (id: string) => deleteRecord<CallbackRequest>(CALLBACK_STORAGE_KEY, id);

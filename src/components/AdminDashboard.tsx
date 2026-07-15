@@ -15,18 +15,15 @@ import {
 import { AnkletLogo } from "./AnkletLogo";
 import {
   clearAdminSession,
-  deleteCallbackRequest,
-  deleteConsultationRequest,
-  deleteQuoteRequest,
+
   getAdminSession,
   type AdminRecordStatus,
-  updateCallbackRequestStatus,
 } from "../admin/adminStorage";
 import { CallbackRequest, ConsultationRequest, QuoteRequest } from "../types";
 import { useEffect, useState } from "react";
-import { getAllQuotes, updateQuoteStatus } from "../api/quoteApi";
-import { getAllConsultations, updateConsultationStatus } from "../api/consultationApi";
-import { getAllTechnicalConsultations, updateCallbackStatus } from "../api/technicalConsultationApi";
+import { getAllQuotes, updateQuoteStatus, deleteQuote } from "../api/quoteApi";
+import { getAllConsultations, updateConsultationStatus, deleteConsultation } from "../api/consultationApi";
+import { getAllTechnicalConsultations, updateCallbackStatus, deleteCallback } from "../api/technicalConsultationApi";
 import { logout } from "../api/authApi";
 
 
@@ -291,7 +288,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
     return;
   };
 
-  const deleteSelectedRecord = () => {
+  const deleteSelectedRecord = async () => {
     if (!selectedRecord) {
       return;
     }
@@ -301,18 +298,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       return;
     }
 
-    if (selectedRecord.kind === "quote") {
-      deleteQuoteRequest(selectedRecord.data.quoteId);
-      setQuoteRows((rows) => rows.filter((row) => row.quoteId !== selectedRecord.data.quoteId));
-    } else if (selectedRecord.kind === "consultation") {
-      deleteConsultationRequest(selectedRecord.data.consultationId);
-      setConsultRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.consultationId));
-    } else {
-      deleteCallbackRequest(selectedRecord.data.technicalConsultationId);
-      setCallbackRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.technicalConsultationId));
-    }
+    try {
+      if (selectedRecord.kind === "quote") {
+        await deleteQuote(selectedRecord.data.quoteId);
+        setQuoteRows((rows) =>
+          rows.filter((row) => row.quoteId !== selectedRecord.data.quoteId)
+        );
+      } else if (selectedRecord.kind === "consultation") {
+        await deleteConsultation(selectedRecord.data.consultationId);
+        setConsultRows((rows) =>
+          rows.filter(
+            (row) => row.consultationId !== selectedRecord.data.consultationId
+          )
+        );
+      } else {
+        await deleteCallback(selectedRecord.data.technicalConsultationId);
+        setCallbackRows((rows) =>
+          rows.filter(
+            (row) =>
+              row.technicalConsultationId !==
+              selectedRecord.data.technicalConsultationId
+          )
+        );
+      }
 
-    setSelectedRecord(null);
+      setSelectedRecord(null);
+    } catch (error) {
+      console.error("Failed to delete record:", error);
+    }
   };
 
   const activeRows =
