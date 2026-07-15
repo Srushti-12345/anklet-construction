@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Send, 
-  CheckCircle, 
-  Facebook, 
-  Instagram, 
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Send,
+  CheckCircle,
+  Facebook,
+  Instagram,
   CalendarDays,
   FileText,
   History,
@@ -66,14 +66,14 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     if (consults) setSavedConsults(JSON.parse(consults));
   }, []);
 
- 
+
   useEffect(() => {
     if (projectType && activeTab === "quote") {
       setQuoteType(projectType);
     }
   }, [projectType, activeTab]);
 
-   const handleQuoteSubmit = async (e: React.FormEvent) => {
+  const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setQuoteLoading(true);
@@ -167,7 +167,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 xl:gap-10" id="contact-panel-wrapper">
       {/* LEFT COLUMN: Premium Active Inquiry Forms */}
       <div className="xl:col-span-7 bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 shadow-xl border border-gray-100 dark:border-slate-700/60">
-        
+
         {/* Tab Header Selector */}
         <div className="flex border-b border-gray-100 dark:border-slate-700 pb-4 mb-8">
           <button
@@ -317,23 +317,23 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                 onChange={(e) => setQuoteBudget(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
               >
-                <option value="UNDER_50_LAKHS">
+                <option value="Under ₹50 Lakhs">
                   Under 50 Lakhs
                 </option>
 
-                <option value="FIFTY_LAKHS_TO_ONE_CRORE">
+                <option value="₹50 Lakhs - ₹1 Crore">
                   50 Lakhs - 1 Crore
                 </option>
 
-                <option value="ONE_CRORE_TO_FIVE_CRORES">
+                <option value="₹1 Crore - ₹5 Crores">
                   1 Crore - 5 Crores
                 </option>
 
-                <option value="FIVE_CRORES_TO_TWENTY_FIVE_CRORES">
+                <option value="₹5 Crores - ₹25 Crores">
                   5 Crores - 25 Crores
                 </option>
 
-                <option value="ABOVE_TWENTY_FIVE_CRORES">
+                <option value="Above ₹25 Crores">
                   Above 25 Crores (Corporate Scale)
                 </option>
               </select>
@@ -432,15 +432,15 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                   onChange={(e) => setConsultTime(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
                 >
-                  <option value="TEN_TO_TWELVE">
+                  <option value="10:00 AM - 12:00 PM">
                     10:00 AM - 12:00 PM
                   </option>
 
-                  <option value="ONE_TO_THREE">
+                  <option value="01:00 PM - 03:00 PM">
                     01:00 PM - 03:00 PM
                   </option>
 
-                  <option value="FOUR_TO_SIX">
+                  <option value="04:00 PM - 06:00 PM (Executive Hub)">
                     04:00 PM - 06:00 PM (Executive Hub)
                   </option>
                 </select>

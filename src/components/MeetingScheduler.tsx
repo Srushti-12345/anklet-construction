@@ -41,7 +41,7 @@ export const MeetingScheduler: React.FC = () => {
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [dept, setDept] = useState<string>("RCC_STRUCTURAL_DESIGN");
   const [date, setDate] = useState<string>("");
-  const [time, setTime] = useState<string>("TEN_TO_TWELVE");
+  const [time, setTime] = useState<string>("10:00 AM - 12:00 PM");
   const [clientName, setClientName] = useState<string>("");
   const [clientPhone, setClientPhone] = useState<string>("");
   const [isBooked, setIsBooked] = useState<boolean>(false);
@@ -81,7 +81,7 @@ export const MeetingScheduler: React.FC = () => {
       // Reset form
       setDept("RCC_STRUCTURAL_DESIGN");
       setDate("");
-      setTime("TEN_TO_TWELVE");
+      setTime("10:00 AM - 12:00 PM");
       setClientName("");
       setClientPhone("");
 
@@ -214,17 +214,17 @@ export const MeetingScheduler: React.FC = () => {
                     onChange={(e) => setTime(e.target.value)}
                     className="w-full text-xs font-bold p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:border-brand-orange focus:outline-none text-gray-700 dark:text-gray-300"
                   >
-                    <option value="TEN_TO_TWELVE">
-                      10:00 AM - 12:00 PM
-                    </option>
+                    <option value="10:00 AM - 12:00 PM">
+                    10:00 AM - 12:00 PM
+                  </option>
 
-                    <option value="ONE_TO_THREE">
-                      01:00 PM - 03:00 PM
-                    </option>
+                  <option value="01:00 PM - 03:00 PM">
+                    01:00 PM - 03:00 PM
+                  </option>
 
-                    <option value="FOUR_TO_SIX">
-                      04:00 PM - 06:00 PM (Executive Hub)
-                    </option>
+                  <option value="04:00 PM - 06:00 PM (Executive Hub)">
+                    04:00 PM - 06:00 PM (Executive Hub)
+                  </option>
                   </select>
                 </div>
               </div>
