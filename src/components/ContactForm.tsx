@@ -304,6 +304,9 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                   <option value="RENOVATION_STRUCTURAL_UPGRADE">
                     Renovation & Structural Upgrade
                   </option>
+                  <option value="AGRICULTURAL_INFRASTRUCTURE">
+                    Agricultural Infrastructure
+                  </option>
                 </select>
               </div>
             </div>
