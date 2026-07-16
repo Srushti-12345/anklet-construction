@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Send, 
-  CheckCircle, 
-  Facebook, 
-  Instagram, 
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Send,
+  CheckCircle,
+  Facebook,
+  Instagram,
   CalendarDays,
   FileText,
   History,
   Trash2
 } from "lucide-react";
 import { QuoteRequest, ConsultationRequest } from "../types";
+import { submitQuoteRequest } from "../api/quoteApi";
+import { submitConsultationRequest } from "../api/consultationApi";
 
 interface ContactFormProps {
   activeTab?: "quote" | "consult";
@@ -27,25 +29,27 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   projectType
 }) => {
   const [localActiveTab, setLocalActiveTab] = useState<"quote" | "consult">("quote");
-  
+
   const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : localActiveTab;
   const setActiveTab = controlledSetActiveTab !== undefined ? controlledSetActiveTab : setLocalActiveTab;
-  
+
   // Quote form state
+  const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteName, setQuoteName] = useState("");
   const [quoteEmail, setQuoteEmail] = useState("");
   const [quotePhone, setQuotePhone] = useState("");
-  const [quoteType, setQuoteType] = useState("Residential Construction");
-  const [quoteBudget, setQuoteBudget] = useState("50L - 1 Crore");
+  const [quoteType, setQuoteType] = useState("RESIDENTIAL_CONSTRUCTION");
+  const [quoteBudget, setQuoteBudget] = useState("UNDER_50_LAKHS");
   const [quoteMessage, setQuoteMessage] = useState("");
   const [quoteSuccess, setQuoteSuccess] = useState<string | null>(null);
 
   // Consultation form state
+  const [consultLoading, setConsultLoading] = useState(false);
   const [consultName, setConsultName] = useState("");
   const [consultEmail, setConsultEmail] = useState("");
   const [consultPhone, setConsultPhone] = useState("");
   const [consultDate, setConsultDate] = useState("");
-  const [consultTime, setConsultTime] = useState("10:00 AM - 12:00 PM");
+  const [consultTime, setConsultTime] = useState("TEN_TO_TWELVE");
   const [consultMessage, setConsultMessage] = useState("");
   const [consultSuccess, setConsultSuccess] = useState<string | null>(null);
 
@@ -62,75 +66,94 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     if (consults) setSavedConsults(JSON.parse(consults));
   }, []);
 
+
   useEffect(() => {
     if (projectType && activeTab === "quote") {
       setQuoteType(projectType);
     }
   }, [projectType, activeTab]);
 
-  const handleQuoteSubmit = (e: React.FormEvent) => {
+  const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quoteName || !quoteEmail || !quotePhone) return;
 
-    const newQuote: QuoteRequest = {
-      id: "QT-" + Math.floor(100000 + Math.random() * 900000),
-      name: quoteName,
-      email: quoteEmail,
-      phone: quotePhone,
-      projectType: quoteType,
-      budget: quoteBudget,
-      message: quoteMessage,
-      submittedAt: new Date().toLocaleDateString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    setQuoteLoading(true);
 
-    const updated = [newQuote, ...savedQuotes];
-    setSavedQuotes(updated);
-    localStorage.setItem("anklet_quotes", JSON.stringify(updated));
-    setQuoteSuccess(newQuote.id);
+    try {
 
-    // Reset fields
-    setQuoteName("");
-    setQuoteEmail("");
-    setQuotePhone("");
-    setQuoteMessage("");
+      const request = {
+        fullName: quoteName,
+        emailAddress: quoteEmail,
+        contactNumber: quotePhone,
+        projectClassification: quoteType,
+        estimatedProjectBudget: quoteBudget,
+        projectVisionScopeSpecifications: quoteMessage
+      };
 
-    setTimeout(() => setQuoteSuccess(null), 8000);
+      const response = await submitQuoteRequest(request);
+
+      setQuoteSuccess(response.data.id);
+
+      setQuoteName("");
+      setQuoteEmail("");
+      setQuotePhone("");
+      setQuoteType("RESIDENTIAL_CONSTRUCTION");
+      setQuoteBudget("UNDER_50_LAKHS");
+      setQuoteMessage("");
+
+    } catch (error: any) {
+
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message ??
+        "Something went wrong while submitting your quote request."
+      );
+
+    } finally {
+
+      setQuoteLoading(false);
+
+    }
   };
 
-  const handleConsultSubmit = (e: React.FormEvent) => {
+  const handleConsultSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!consultName || !consultEmail || !consultPhone || !consultDate) return;
 
-    const newConsult: ConsultationRequest = {
-      id: "CS-" + Math.floor(100000 + Math.random() * 900000),
-      name: consultName,
-      email: consultEmail,
-      phone: consultPhone,
-      preferredDate: consultDate,
-      timeSlot: consultTime,
-      message: consultMessage,
-      submittedAt: new Date().toLocaleDateString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    setConsultLoading(true);
 
-    const updated = [newConsult, ...savedConsults];
-    setSavedConsults(updated);
-    localStorage.setItem("anklet_consults", JSON.stringify(updated));
-    setConsultSuccess(newConsult.id);
+    try {
+      const request = {
+        fullName: consultName,
+        emailAddress: consultEmail,
+        contactNumber: consultPhone,
+        preferredDate: consultDate,
+        timeSlot: consultTime,
+        consultationTopic: consultMessage,
+      };
 
-    // Reset fields
-    setConsultName("");
-    setConsultEmail("");
-    setConsultPhone("");
-    setConsultDate("");
-    setConsultMessage("");
+      const response = await submitConsultationRequest(request);
 
-    setTimeout(() => setConsultSuccess(null), 8000);
+      setConsultSuccess(response.data.id);
+
+      // Reset form
+      setConsultName("");
+      setConsultEmail("");
+      setConsultPhone("");
+      setConsultDate("");
+      setConsultTime("TEN_TO_TWELVE");
+      setConsultMessage("");
+
+    } catch (error: any) {
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message ??
+        "Something went wrong while booking your consultation."
+      );
+
+    } finally {
+      setConsultLoading(false);
+    }
   };
 
   const clearHistory = () => {
@@ -144,16 +167,15 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 xl:gap-10" id="contact-panel-wrapper">
       {/* LEFT COLUMN: Premium Active Inquiry Forms */}
       <div className="xl:col-span-7 bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 shadow-xl border border-gray-100 dark:border-slate-700/60">
-        
+
         {/* Tab Header Selector */}
         <div className="flex border-b border-gray-100 dark:border-slate-700 pb-4 mb-8">
           <button
             onClick={() => setActiveTab("quote")}
-            className={`flex items-center gap-2 pb-4 px-4 font-bold text-sm uppercase tracking-wider relative transition-colors duration-200 cursor-pointer ${
-              activeTab === "quote" 
-                ? "text-brand-orange" 
-                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            }`}
+            className={`flex items-center gap-2 pb-4 px-4 font-bold text-sm uppercase tracking-wider relative transition-colors duration-200 cursor-pointer ${activeTab === "quote"
+              ? "text-brand-orange"
+              : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              }`}
           >
             <FileText className="w-4 h-4" />
             Request a Quote
@@ -161,14 +183,13 @@ export const ContactForm: React.FC<ContactFormProps> = ({
               <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-brand-orange rounded-full" />
             )}
           </button>
-          
+
           <button
             onClick={() => setActiveTab("consult")}
-            className={`flex items-center gap-2 pb-4 px-4 font-bold text-sm uppercase tracking-wider relative transition-colors duration-200 cursor-pointer ${
-              activeTab === "consult" 
-                ? "text-brand-orange" 
-                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            }`}
+            className={`flex items-center gap-2 pb-4 px-4 font-bold text-sm uppercase tracking-wider relative transition-colors duration-200 cursor-pointer ${activeTab === "consult"
+              ? "text-brand-orange"
+              : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              }`}
           >
             <CalendarDays className="w-4 h-4" />
             Schedule Consultation
@@ -231,9 +252,17 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                 <input
                   type="tel"
                   required
-                  placeholder="e.g. +91 74149 38354"
+                  placeholder="e.g. 9876543210"
                   value={quotePhone}
-                  onChange={(e) => setQuotePhone(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, ""); // Allow only digits
+                    if (value.length <= 10) {
+                      setQuotePhone(value);
+                    }
+                  }}
+                  maxLength={10}
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit mobile number"
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
                 />
               </div>
@@ -248,13 +277,36 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                   onChange={(e) => setQuoteType(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
                 >
-                  <option>Residential Construction</option>
-                  <option>Commercial Construction</option>
-                  <option>Infrastructure Development</option>
-                  <option>Architectural Design</option>
-                  <option>Interior Design & Turnkey Fitout</option>
-                  <option>Civil Engineering Consultancy</option>
-                  <option>Renovation & Structural Upgrade</option>
+                  <option value="RESIDENTIAL_CONSTRUCTION">
+                    Residential Construction
+                  </option>
+
+                  <option value="COMMERCIAL_CONSTRUCTION">
+                    Commercial Construction
+                  </option>
+
+                  <option value="INFRASTRUCTURE_DEVELOPMENT">
+                    Infrastructure Development
+                  </option>
+
+                  <option value="ARCHITECTURAL_DESIGN">
+                    Architectural Design
+                  </option>
+
+                  <option value="INTERIOR_DESIGN_TURNKEY_FITOUT">
+                    Interior Design & Turnkey Fitout
+                  </option>
+
+                  <option value="CIVIL_ENGINEERING_CONSULTANCY">
+                    Civil Engineering Consultancy
+                  </option>
+
+                  <option value="RENOVATION_STRUCTURAL_UPGRADE">
+                    Renovation & Structural Upgrade
+                  </option>
+                  <option value="AGRICULTURAL_INFRASTRUCTURE">
+                    Agricultural Infrastructure
+                  </option>
                 </select>
               </div>
             </div>
@@ -268,11 +320,25 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                 onChange={(e) => setQuoteBudget(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
               >
-                <option>Under 50 Lakhs</option>
-                <option>50 Lakhs - 1 Crore</option>
-                <option>1 Crore - 5 Crores</option>
-                <option>5 Crores - 25 Crores</option>
-                <option>Above 25 Crores (Corporate Scale)</option>
+                <option value="Under ₹50 Lakhs">
+                  Under 50 Lakhs
+                </option>
+
+                <option value="₹50 Lakhs - ₹1 Crore">
+                  50 Lakhs - 1 Crore
+                </option>
+
+                <option value="₹1 Crore - ₹5 Crores">
+                  1 Crore - 5 Crores
+                </option>
+
+                <option value="₹5 Crores - ₹25 Crores">
+                  5 Crores - 25 Crores
+                </option>
+
+                <option value="Above ₹25 Crores">
+                  Above 25 Crores (Corporate Scale)
+                </option>
               </select>
             </div>
 
@@ -291,10 +357,14 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
             <button
               type="submit"
-              className="w-full flex justify-center items-center gap-2 bg-brand-navy dark:bg-brand-orange text-white py-4 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-orange-600 transition-all cursor-pointer"
+              disabled={quoteLoading}
+              className="w-full flex justify-center items-center gap-2 bg-brand-navy dark:bg-brand-orange text-white py-4 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:bg-slate-800 dark:hover:bg-orange-600 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
-              Submit Structural Quote Request
+
+              {quoteLoading
+                ? "Submitting..."
+                : "Submit Structural Quote Request"}
             </button>
           </form>
         ) : (
@@ -349,6 +419,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                 <input
                   type="date"
                   required
+                  min={new Date().toISOString().split("T")[0]}
                   value={consultDate}
                   onChange={(e) => setConsultDate(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
@@ -364,9 +435,17 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                   onChange={(e) => setConsultTime(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
                 >
-                  <option>10:00 AM - 12:00 PM</option>
-                  <option>01:00 PM - 03:00 PM</option>
-                  <option>04:00 PM - 06:00 PM (Executive Hub)</option>
+                  <option value="10:00 AM - 12:00 PM">
+                    10:00 AM - 12:00 PM
+                  </option>
+
+                  <option value="01:00 PM - 03:00 PM">
+                    01:00 PM - 03:00 PM
+                  </option>
+
+                  <option value="04:00 PM - 06:00 PM (Executive Hub)">
+                    04:00 PM - 06:00 PM (Executive Hub)
+                  </option>
                 </select>
               </div>
             </div>
@@ -378,9 +457,17 @@ export const ContactForm: React.FC<ContactFormProps> = ({
               <input
                 type="tel"
                 required
-                placeholder="e.g. +91 74149 38354"
+                placeholder="e.g. 9876543210"
                 value={consultPhone}
-                onChange={(e) => setConsultPhone(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "");
+                  if (value.length <= 10) {
+                    setConsultPhone(value);
+                  }
+                }}
+                maxLength={10}
+                pattern="[0-9]{10}"
+                title="Please enter a valid 10-digit mobile number"
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 focus:border-brand-orange focus:bg-white dark:focus:bg-slate-950 rounded-xl text-sm transition-colors focus:outline-none dark:text-white"
               />
             </div>
@@ -400,10 +487,13 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
             <button
               type="submit"
+              disabled={consultLoading}
               className="w-full flex justify-center items-center gap-2 bg-brand-orange text-white py-4 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-500/10 hover:bg-orange-600 transition-all cursor-pointer"
             >
               <CalendarDays className="w-4 h-4" />
-              Book Technical Consultation Session
+              {consultLoading
+                ? "Booking..."
+                : "Book Technical Consultation Session"}
             </button>
           </form>
         )}
@@ -434,7 +524,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                     <p className="text-gray-500 dark:text-gray-400 mt-1 italic">"{q.message || "No comments"}"</p>
                   </div>
                 ))}
-                
+
                 {savedConsults.map((c) => (
                   <div key={c.id} className="p-3 bg-gray-50 dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 text-xs">
                     <div className="flex justify-between font-bold text-gray-800 dark:text-gray-200">

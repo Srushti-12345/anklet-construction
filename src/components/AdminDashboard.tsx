@@ -8,7 +8,6 @@ import {
   Mail,
   Search,
   PhoneCall,
-  ShieldCheck,
   Trash2,
   UserCircle2,
   UsersRound,
@@ -16,20 +15,16 @@ import {
 } from "lucide-react";
 import { AnkletLogo } from "./AnkletLogo";
 import {
-  clearAdminSession,
-  deleteCallbackRequest,
-  deleteConsultationRequest,
-  deleteQuoteRequest,
   getAdminSession,
-  getCallbackRequests,
-  getConsultationRequests,
-  getQuoteRequests,
   type AdminRecordStatus,
-  updateCallbackRequestStatus,
-  updateConsultationRequestStatus,
-  updateQuoteRequestStatus,
 } from "../admin/adminStorage";
 import { CallbackRequest, ConsultationRequest, QuoteRequest } from "../types";
+import { useEffect, useState } from "react";
+import { getAllQuotes, updateQuoteStatus, deleteQuote } from "../api/quoteApi";
+import { getAllConsultations, updateConsultationStatus, deleteConsultation } from "../api/consultationApi";
+import { getAllTechnicalConsultations, updateCallbackStatus, deleteCallback } from "../api/technicalConsultationApi";
+import { useAuth } from "../context/AuthContext";
+
 
 interface AdminDashboardProps {
   onNavigate: (path: string) => void;
@@ -47,25 +42,25 @@ type SelectedRecord =
   | { kind: "consultation"; data: ConsultationRow }
   | { kind: "callback"; data: CallbackRow };
 
-const RECORD_STATUS_OPTIONS: AdminRecordStatus[] = ["new", "contacted", "completed", "closed"];
+const RECORD_STATUS_OPTIONS: AdminRecordStatus[] = ["NEW", "CONTACTED", "COMPLETED", "CLOSED"];
 
 const STATUS_META: Record<AdminRecordStatus, { label: string; chip: string; select: string }> = {
-  new: {
+  NEW: {
     label: "New",
     chip: "bg-amber-50 text-amber-700 border-amber-200",
     select: "bg-amber-50 text-amber-800 border-amber-200 focus:border-amber-400",
   },
-  contacted: {
+  CONTACTED: {
     label: "Contacted",
     chip: "bg-sky-50 text-sky-700 border-sky-200",
     select: "bg-sky-50 text-sky-800 border-sky-200 focus:border-sky-400",
   },
-  completed: {
+  COMPLETED: {
     label: "Completed",
     chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
     select: "bg-emerald-50 text-emerald-800 border-emerald-200 focus:border-emerald-400",
   },
-  closed: {
+  CLOSED: {
     label: "Closed",
     chip: "bg-slate-100 text-slate-700 border-slate-200",
     select: "bg-slate-100 text-slate-700 border-slate-200 focus:border-slate-400",
@@ -87,9 +82,11 @@ const formatSubmittedAt = (value: string) => {
   });
 };
 
-const buildMailtoLink = (email: string) => `mailto:${email.trim()}`;
+const buildMailtoLink = (email?: string) =>
+  email ? `mailto:${email.trim()}` : "#";
 
-const buildTelLink = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
+const buildTelLink = (phone?: string) =>
+  phone ? `tel:${phone.replace(/\s+/g, "")}` : "#";
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
   const [quoteRows, setQuoteRows] = React.useState<QuoteRow[]>(() => getQuoteRequests() as QuoteRow[]);
@@ -115,20 +112,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   );
   const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
   const [adminSession, setAdminSession] = React.useState(() => getAdminSession());
+  console.log("Admin session:", adminSession);
   const profileMenuRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
-    const refresh = () => {
-      setQuoteRows(getQuoteRequests() as QuoteRow[]);
-      setConsultRows(getConsultationRequests() as ConsultationRow[]);
-      setCallbackRows(getCallbackRequests() as CallbackRow[]);
-      setAdminSession(getAdminSession());
-    };
-
-    refresh();
-    window.addEventListener("storage", refresh);
-    return () => window.removeEventListener("storage", refresh);
+    loadDashboardData();
   }, []);
+
+  const recordId = selectedRecord
+    ? selectedRecord.kind === "quote"
+      ? selectedRecord.data.quoteId
+      : selectedRecord.kind === "consultation"
+        ? selectedRecord.data.consultationId
+        : selectedRecord.data.technicalConsultationId
+    : "";
+
+  const loadDashboardData = async () => {
+    try {
+      const [quotesRes, consultationsRes, technicalRes] = await Promise.all([
+        getAllQuotes(),
+        getAllConsultations(),
+        getAllTechnicalConsultations(),
+      ]);
+
+      setQuoteRows(quotesRes.data);
+      setConsultRows(consultationsRes.data);
+      setCallbackRows(technicalRes.data);
+    } catch (error) {
+      console.error("Failed to load dashboard data", error);
+    }
+  };
 
   React.useEffect(() => {
     const syncPage = () => {
@@ -183,36 +196,105 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleLogout = () => {
-    clearAdminSession();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    await auth.logout();
     onNavigate("/admin/login");
   };
 
-  const updateSelectedStatus = (status: AdminRecordStatus) => {
+  const updateSelectedStatus = async (status: AdminRecordStatus) => {
     if (!selectedRecord) {
       return;
     }
 
     if (selectedRecord.kind === "quote") {
-      updateQuoteRequestStatus(selectedRecord.data.id, status);
-      setQuoteRows((rows) => rows.map((row) => (row.id === selectedRecord.data.id ? { ...row, status } : row)));
-      setSelectedRecord({ kind: "quote", data: { ...selectedRecord.data, status } });
+      try {
+        await updateQuoteStatus(
+          selectedRecord.data.quoteId,
+          status
+        );
+
+        setQuoteRows((rows) =>
+          rows.map((row) =>
+            row.quoteId === selectedRecord.data.quoteId
+              ? { ...row, status }
+              : row
+          )
+        );
+
+        setSelectedRecord({
+          kind: "quote",
+          data: {
+            ...selectedRecord.data,
+            status,
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+
       return;
     }
 
     if (selectedRecord.kind === "consultation") {
-      updateConsultationRequestStatus(selectedRecord.data.id, status);
-      setConsultRows((rows) => rows.map((row) => (row.id === selectedRecord.data.id ? { ...row, status } : row)));
-      setSelectedRecord({ kind: "consultation", data: { ...selectedRecord.data, status } });
+      try {
+        await updateConsultationStatus(
+          selectedRecord.data.consultationId,
+          status
+        );
+
+        setConsultRows((rows) =>
+          rows.map((row) =>
+            row.id === selectedRecord.data.consultationId
+              ? { ...row, status }
+              : row
+          )
+        );
+
+        setSelectedRecord({
+          kind: "consultation",
+          data: {
+            ...selectedRecord.data,
+            status,
+          },
+        });
+      } catch (error) {
+        console.error("Failed to update consultation status:", error);
+      }
+
       return;
     }
 
-    updateCallbackRequestStatus(selectedRecord.data.id, status);
-    setCallbackRows((rows) => rows.map((row) => (row.id === selectedRecord.data.id ? { ...row, status } : row)));
-    setSelectedRecord({ kind: "callback", data: { ...selectedRecord.data, status } });
+    try {
+      await updateCallbackStatus(
+        selectedRecord.data.technicalConsultationId,
+        status
+      );
+
+      setCallbackRows((rows) =>
+        rows.map((row) =>
+          row.id === selectedRecord.data.technicalConsultationId
+            ? { ...row, status }
+            : row
+        )
+      );
+
+      setSelectedRecord({
+        kind: "callback",
+        data: {
+          ...selectedRecord.data,
+          status,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to update callback status:", error);
+    }
+
+    return;
   };
 
-  const deleteSelectedRecord = () => {
+  const deleteSelectedRecord = async () => {
     if (!selectedRecord) {
       return;
     }
@@ -222,18 +304,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       return;
     }
 
-    if (selectedRecord.kind === "quote") {
-      deleteQuoteRequest(selectedRecord.data.id);
-      setQuoteRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.id));
-    } else if (selectedRecord.kind === "consultation") {
-      deleteConsultationRequest(selectedRecord.data.id);
-      setConsultRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.id));
-    } else {
-      deleteCallbackRequest(selectedRecord.data.id);
-      setCallbackRows((rows) => rows.filter((row) => row.id !== selectedRecord.data.id));
-    }
+    try {
+      if (selectedRecord.kind === "quote") {
+        await deleteQuote(selectedRecord.data.quoteId);
+        setQuoteRows((rows) =>
+          rows.filter((row) => row.quoteId !== selectedRecord.data.quoteId)
+        );
+      } else if (selectedRecord.kind === "consultation") {
+        await deleteConsultation(selectedRecord.data.consultationId);
+        setConsultRows((rows) =>
+          rows.filter(
+            (row) => row.consultationId !== selectedRecord.data.consultationId
+          )
+        );
+      } else {
+        await deleteCallback(selectedRecord.data.technicalConsultationId);
+        setCallbackRows((rows) =>
+          rows.filter(
+            (row) =>
+              row.technicalConsultationId !==
+              selectedRecord.data.technicalConsultationId
+          )
+        );
+      }
 
-    setSelectedRecord(null);
+      setSelectedRecord(null);
+    } catch (error) {
+      console.error("Failed to delete record:", error);
+    }
   };
 
   const activeRows =
@@ -322,8 +420,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         ? "Review consultation bookings in a focused workspace built for quick triage."
         : "Manage callback requests with clear status controls and fast record access.";
 
+
   const activeCount = activeRows.length;
-  const adminName = adminSession?.name?.trim() || "Admin";
+  const adminName = adminSession?.fullName?.trim() || "Admin";
   const recordTypeLabel =
     selectedRecord?.kind === "quote"
       ? "Project Type"
@@ -332,10 +431,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         : "Focus Area";
   const recordTypeValue = selectedRecord
     ? selectedRecord.kind === "quote"
-      ? selectedRecord.data.projectType
+      ? selectedRecord.data.projectClassification
       : selectedRecord.kind === "consultation"
         ? selectedRecord.data.preferredDate
-        : selectedRecord.data.focusArea
+        : selectedRecord.data.consultationFocusArea
     : "";
   const recordSecondaryLabel =
     selectedRecord?.kind === "quote"
@@ -345,7 +444,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         : "Schedule";
   const recordSecondaryValue = selectedRecord
     ? selectedRecord.kind === "quote"
-      ? selectedRecord.data.budget
+      ? selectedRecord.data.estimatedProjectBudget
       : selectedRecord.kind === "consultation"
         ? selectedRecord.data.timeSlot
         : `${selectedRecord.data.preferredDate} at ${selectedRecord.data.timeSlot}`
@@ -393,11 +492,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
               <button
                 type="button"
                 onClick={() => navigateToPage("quotes")}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
-                  activePage === "quotes"
-                    ? "border-brand-orange/40 bg-brand-orange text-white shadow-lg shadow-orange-500/20"
-                    : "border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
-                }`}
+                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${activePage === "quotes"
+                  ? "border-brand-orange/40 bg-brand-orange text-white shadow-lg shadow-orange-500/20"
+                  : "border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
+                  }`}
               >
                 <span className="inline-flex items-center gap-3 text-sm font-bold">
                   <FileText className="h-4 w-4" />
@@ -411,11 +509,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
               <button
                 type="button"
                 onClick={() => navigateToPage("consultations")}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
-                  activePage === "consultations"
-                    ? "border-brand-orange/40 bg-brand-orange text-white shadow-lg shadow-orange-500/20"
-                    : "border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
-                }`}
+                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${activePage === "consultations"
+                  ? "border-brand-orange/40 bg-brand-orange text-white shadow-lg shadow-orange-500/20"
+                  : "border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
+                  }`}
               >
                 <span className="inline-flex items-center gap-3 text-sm font-bold">
                   <CalendarDays className="h-4 w-4" />
@@ -429,11 +526,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
               <button
                 type="button"
                 onClick={() => navigateToPage("callbacks")}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
-                  activePage === "callbacks"
-                    ? "border-brand-orange/40 bg-brand-orange text-white shadow-lg shadow-orange-500/20"
-                    : "border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
-                }`}
+                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${activePage === "callbacks"
+                  ? "border-brand-orange/40 bg-brand-orange text-white shadow-lg shadow-orange-500/20"
+                  : "border-white/10 bg-white/5 text-slate-200 hover:border-white/20 hover:bg-white/10"
+                  }`}
               >
                 <span className="inline-flex items-center gap-3 text-sm font-bold">
                   <Clock3 className="h-4 w-4" />
@@ -497,8 +593,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                   <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 w-72 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
                     <div className="rounded-2xl bg-slate-50 p-4">
                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Signed In</p>
-                      <p className="mt-2 text-base font-bold text-slate-950">{adminName}</p>
-                      <p className="mt-1 wrap-break-word text-sm text-slate-500">{adminSession?.email ?? "admin"}</p>
+                      <p className="mt-2 text-base font-bold text-slate-950">{adminSession?.fullName}</p>
+                      <p className="mt-1 wrap-break-word text-sm text-slate-500">{adminSession?.email}</p>
                       <p className="mt-3 text-xs text-slate-400">
                         Session started at {adminSession?.signedInAt ? formatSubmittedAt(adminSession.signedInAt) : "unknown"}
                       </p>
@@ -560,47 +656,58 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <>
                   <td className="px-5 py-5 font-mono text-xs font-bold text-brand-orange">
                     <span className="inline-flex rounded-full border border-brand-orange/15 bg-brand-orange/10 px-2.5 py-1">
-                      {row.id}
+                      {row.quoteId}
                     </span>
                   </td>
                   <td className="px-5 py-5">
-                    <p className="font-bold text-slate-950">{row.name}</p>
+                    <p className="font-bold text-slate-950">{row.fullName}</p>
                     <p className="mt-1 text-xs text-slate-500">Quote request</p>
                   </td>
                   <td className="px-5 py-5">
                     <div className="space-y-1 text-sm text-slate-700">
                       <a
-                        href={buildMailtoLink(row.email)}
+                        href={buildMailtoLink(row.emailAddress)}
                         onClick={(event) => event.stopPropagation()}
                         className="inline-flex items-center gap-2 font-medium text-slate-700 transition-colors hover:text-brand-orange"
                       >
                         <Mail className="h-4 w-4 text-slate-400" />
-                        <span className="truncate">{row.email}</span>
+                        <span className="truncate">{row.emailAddress}</span>
                       </a>
                       <a
-                        href={buildTelLink(row.phone)}
+                        href={buildTelLink(row.contactNumber)}
                         onClick={(event) => event.stopPropagation()}
                         className="inline-flex items-center gap-2 font-medium text-slate-700 transition-colors hover:text-brand-orange"
                       >
                         <PhoneCall className="h-4 w-4 text-slate-400" />
-                        <span className="truncate">{row.phone}</span>
+                        <span className="truncate">{row.contactNumber}</span>
                       </a>
                     </div>
                   </td>
                   <td className="px-5 py-5">
                     <div className="space-y-1">
-                      <p className="font-semibold text-slate-950">{row.projectType}</p>
-                      <p className="text-xs text-slate-500">{row.budget}</p>
+                      <p className="font-semibold text-slate-950">{row.projectClassification}</p>
+                      <p className="text-xs text-slate-500">{row.estimatedProjectBudget}</p>
                       <p className="line-clamp-2 text-xs leading-relaxed text-slate-400">
-                        {row.message || "No message provided"}
+                        {row.projectVisionScopeSpecifications || "No message provided"}
                       </p>
                     </div>
                   </td>
                   <td className="px-5 py-5 text-sm text-slate-600">{formatSubmittedAt(row.submittedAt)}</td>
                   <td className="px-5 py-5">
-                    {renderStatusSelect(row.status, (status) => {
-                      updateQuoteRequestStatus(row.id, status);
-                      setQuoteRows((rows) => rows.map((item) => (item.id === row.id ? { ...item, status } : item)));
+                    {renderStatusSelect(row.status, async (status) => {
+                      try {
+                        await updateQuoteStatus(row.quoteId, status);
+
+                        setQuoteRows((rows) =>
+                          rows.map((r) =>
+                            r.quoteId === row.quoteId
+                              ? { ...r, status }
+                              : r
+                          )
+                        );
+                      } catch (error) {
+                        console.error("Failed to update quote status:", error);
+                      }
                     })}
                   </td>
                 </>
@@ -637,30 +744,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <>
                   <td className="px-5 py-5 font-mono text-xs font-bold text-brand-orange">
                     <span className="inline-flex rounded-full border border-brand-orange/15 bg-brand-orange/10 px-2.5 py-1">
-                      {row.id}
+                      {row.consultationId}
                     </span>
                   </td>
                   <td className="px-5 py-5">
-                    <p className="font-bold text-slate-950">{row.name}</p>
+                    <p className="font-bold text-slate-950">{row.fullName}</p>
                     <p className="mt-1 text-xs text-slate-500">Consultation request</p>
                   </td>
                   <td className="px-5 py-5">
                     <div className="space-y-1 text-sm text-slate-700">
                       <a
-                        href={buildMailtoLink(row.email)}
+                        href={buildMailtoLink(row.emailAddress)}
                         onClick={(event) => event.stopPropagation()}
                         className="inline-flex items-center gap-2 font-medium text-slate-700 transition-colors hover:text-brand-orange"
                       >
                         <Mail className="h-4 w-4 text-slate-400" />
-                        <span className="truncate">{row.email}</span>
+                        <span className="truncate">{row.emailAddress}</span>
                       </a>
                       <a
-                        href={buildTelLink(row.phone)}
+                        href={buildTelLink(row.contactNumber)}
                         onClick={(event) => event.stopPropagation()}
                         className="inline-flex items-center gap-2 font-medium text-slate-700 transition-colors hover:text-brand-orange"
                       >
                         <PhoneCall className="h-4 w-4 text-slate-400" />
-                        <span className="truncate">{row.phone}</span>
+                        <span className="truncate">{row.contactNumber}</span>
                       </a>
                     </div>
                   </td>
@@ -674,14 +781,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                   <td className="px-5 py-5">
                     <div className="max-w-[16rem] space-y-1">
                       <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">
-                        {row.message || "No message provided"}
+                        {row.consultationTopic || "No message provided"}
                       </p>
                     </div>
                   </td>
                   <td className="px-5 py-5">
-                    {renderStatusSelect(row.status, (status) => {
-                      updateConsultationRequestStatus(row.id, status);
-                      setConsultRows((rows) => rows.map((item) => (item.id === row.id ? { ...item, status } : item)));
+                    {renderStatusSelect(row.status, async (status) => {
+                      try {
+                        await updateConsultationStatus(row.consultationId, status);
+
+                        setConsultRows((rows) =>
+                          rows.map((item) =>
+                            item.consultationId === row.consultationId
+                              ? { ...item, status }
+                              : item
+                          )
+                        );
+                      } catch (error) {
+                        console.error("Failed to update consultation status:", error);
+                      }
                     })}
                   </td>
                 </>
@@ -718,21 +836,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <>
                   <td className="px-5 py-5 font-mono text-xs font-bold text-brand-orange">
                     <span className="inline-flex rounded-full border border-brand-orange/15 bg-brand-orange/10 px-2.5 py-1">
-                      {row.id}
+                      {row.technicalConsultationId}
                     </span>
                   </td>
                   <td className="px-5 py-5">
-                    <p className="font-bold text-slate-950">{row.name}</p>
+                    <p className="font-bold text-slate-950">{row.fullName}</p>
                     <p className="mt-1 text-xs text-slate-500">Callback booking</p>
                   </td>
                   <td className="px-5 py-5">
                     <a
-                      href={buildTelLink(row.phone)}
+                      href={buildTelLink(row.contactNumber)}
                       onClick={(event) => event.stopPropagation()}
                       className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition-colors hover:text-brand-orange"
                     >
                       <PhoneCall className="h-4 w-4 text-slate-400" />
-                      <span className="truncate">{row.phone}</span>
+                      <span className="truncate">{row.contactNumber}</span>
                     </a>
                   </td>
                   <td className="px-5 py-5">
@@ -748,9 +866,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                     </div>
                   </td>
                   <td className="px-5 py-5">
-                    {renderStatusSelect(row.status, (status) => {
-                      updateCallbackRequestStatus(row.id, status);
-                      setCallbackRows((rows) => rows.map((item) => (item.id === row.id ? { ...item, status } : item)));
+                    {renderStatusSelect(row.status, async (status) => {
+                      try {
+                        await updateCallbackStatus(row.technicalConsultationId, status);
+
+                        setCallbackRows((rows) =>
+                          rows.map((r) =>
+                            r.id === row.id
+                              ? { ...r, status }
+                              : r
+                          )
+                        );
+                      } catch (error) {
+                        console.error("Failed to update callback status:", error);
+                      }
                     })}
                   </td>
                 </>
@@ -777,11 +906,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70">Record Card</p>
                   <h3 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
-                    {selectedRecord.data.name}
+                    {selectedRecord.data.fullName}
                   </h3>
                   <p className="mt-1 text-xs text-white/80 sm:text-sm">
                     {selectedRecord.kind === "quote"
-                      ? selectedRecord.data.projectType
+                      ? selectedRecord.data.projectClassification
                       : selectedRecord.kind === "consultation"
                         ? selectedRecord.data.timeSlot
                         : selectedRecord.data.focusArea}
@@ -801,7 +930,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             <div className="grid gap-4 p-4 sm:p-5 md:grid-cols-[1.06fr_0.94fr]">
               <div className="grid gap-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <InfoTile label="Record ID" value={selectedRecord.data.id} tone="brand" />
+                  <InfoTile label="Record ID" value={recordId} tone="brand" />
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5">
                     <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Status</p>
                     <div className="mt-2">
@@ -813,9 +942,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <div className="grid grid-cols-2 gap-3">
                   <InfoTile
                     label="Email"
-                    value={selectedRecord.kind === "callback" ? "Not provided" : selectedRecord.data.email}
+                    value={selectedRecord.kind === "callback" ? "Not provided" : selectedRecord.data.emailAddress}
                   />
-                  <InfoTile label="Phone" value={selectedRecord.data.phone} />
+                  <InfoTile label="Phone" value={selectedRecord.data.contactNumber} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -833,7 +962,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                   </p>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                     {selectedRecord.kind === "quote"
-                      ? selectedRecord.data.message || "No project notes provided."
+                      ? selectedRecord.data.projectVisionScopeSpecifications || "No project notes provided."
                       : selectedRecord.kind === "consultation"
                         ? selectedRecord.data.message || "No consultation notes provided."
                         : `${selectedRecord.data.focusArea} scheduled for ${selectedRecord.data.preferredDate} at ${selectedRecord.data.timeSlot}.`}
@@ -847,7 +976,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <div className="grid gap-2.5">
                   {selectedRecord.kind !== "callback" && (
                     <a
-                      href={buildMailtoLink(selectedRecord.data.email)}
+                      href={buildMailtoLink(selectedRecord.data.emailAddress)}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:border-brand-orange hover:text-brand-orange"
                     >
                       <Mail className="h-4 w-4" />
@@ -855,7 +984,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                     </a>
                   )}
                   <a
-                    href={buildTelLink(selectedRecord.data.phone)}
+                    href={buildTelLink(selectedRecord.data.contactNumber)}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-orange px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-600"
                   >
                     <PhoneCall className="h-4 w-4" />

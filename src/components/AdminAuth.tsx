@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff, KeyRound, Lock, LogIn, ShieldCheck, Sparkles } from "lucide-react";
-import { loginAdmin, signupAdmin } from "../admin/adminStorage";
+import { login, signup } from "../api/authApi";
+import { useAuth } from "../context/AuthContext";
 
 type AuthMode = "login" | "signup";
 
@@ -10,6 +11,7 @@ interface AdminAuthProps {
 }
 
 export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onNavigate }) => {
+  const auth = useAuth();
   const [mode, setMode] = React.useState<AuthMode>(initialMode);
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -19,57 +21,95 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
   const [signupName, setSignupName] = React.useState("");
   const [signupEmail, setSignupEmail] = React.useState("");
   const [signupPassword, setSignupPassword] = React.useState("");
+
   const [signupConfirmPassword, setSignupConfirmPassword] = React.useState("");
+  const [signupForm, setSignupForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
 
   React.useEffect(() => {
     setMode(initialMode);
     setError(null);
   }, [initialMode]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
 
-    const result = loginAdmin({ email: loginEmail, password: loginPassword });
-    setLoading(false);
+    try {
+      const response = await login({
+        email: loginEmail,
+        password: loginPassword,
+      });
 
-    if (!result.ok) {
-      setError(result.message);
-      return;
+      auth.login(response.data.accessToken, {
+        fullName: response.data.fullName,
+        email: response.data.email,
+        role: response.data.role,
+        signedInAt: new Date().toISOString(),
+      });
+
+      onNavigate("/admin/dashboard");
+
+    } catch (error) {
+      console.log("Login error", error);
+      setError("Invalid email or password.");
     }
-
-    onNavigate("/admin/dashboard/quotes");
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    if (signupPassword.length < 6) {
-      setError("Password must be at least 6 characters long.");
+    if (!signupForm.name.trim()) {
+      alert("Please enter your full name.");
       return;
     }
 
-    if (signupPassword !== signupConfirmPassword) {
-      setError("Passwords do not match.");
+    if (!signupForm.email.trim()) {
+      alert("Please enter your email.");
       return;
     }
 
-    setLoading(true);
-    const result = signupAdmin({
-      name: signupName,
-      email: signupEmail,
-      password: signupPassword,
-    });
-    setLoading(false);
-
-    if (!result.ok) {
-      setError(result.message);
+    if (!signupForm.password.trim()) {
+      alert("Please enter your password.");
       return;
     }
 
-    onNavigate("/admin/dashboard/quotes");
+    if (signupForm.password !== signupForm.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await signup({
+        fullName: signupForm.name,
+        email: signupForm.email,
+        password: signupForm.password,
+        confirmPassword: signupForm.confirmPassword,
+      });
+
+      alert(response.data.message ?? "Signup successful!");
+
+      setSignupForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setMode("login");
+
+    } catch (error: any) {
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message ??
+        "Unable to register admin."
+      );
+    }
   };
 
   return (
@@ -229,8 +269,12 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                     <input
                       type="text"
                       required
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
+                      value={signupForm.name}
+                      onChange={(e) => setSignupForm({
+                        ...signupForm,
+                        name: e.target.value,
+                      })
+                      }
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Operations Lead"
                     />
@@ -243,8 +287,11 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                     <input
                       type="email"
                       required
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
+                      value={signupForm.email}
+                      onChange={(e) => setSignupForm({
+                        ...signupForm,
+                        email: e.target.value,
+                      })}
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="admin@company.com"
                     />
@@ -259,8 +306,11 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                     <input
                       type={showPassword ? "text" : "password"}
                       required
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
+                      value={signupForm.password}
+                      onChange={(e) => setSignupForm({
+                        ...signupForm,
+                        password: e.target.value,
+                      })}
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Create a password"
                     />
@@ -273,8 +323,11 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ initialMode = "login", onN
                     <input
                       type={showPassword ? "text" : "password"}
                       required
-                      value={signupConfirmPassword}
-                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                      value={signupForm.confirmPassword}
+                      onChange={(e) => setSignupForm({
+                        ...signupForm,
+                        confirmPassword: e.target.value,
+                      })}
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-slate-900 transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:bg-white focus:outline-none"
                       placeholder="Repeat the password"
                     />

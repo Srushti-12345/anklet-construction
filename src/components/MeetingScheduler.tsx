@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Calendar, Clock, Video, User, BadgeAlert, Award, ShieldAlert } from "lucide-react";
-import { saveCallbackRequest } from "../admin/adminStorage";
+import { Clock, Video } from "lucide-react";
+import { submitTechnicalConsultation } from "../api/technicalConsultationApi";
 
 interface Consultant {
   name: string;
@@ -34,33 +34,70 @@ const CONSULTANTS: Consultant[] = [
   }
 ];
 
+
+
 export const MeetingScheduler: React.FC = () => {
-  const [dept, setDept] = useState<string>("structural");
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState<any>(null);
+  const [dept, setDept] = useState<string>("RCC_STRUCTURAL_DESIGN");
   const [date, setDate] = useState<string>("");
-  const [time, setTime] = useState<string>("11:00 AM");
+  const [time, setTime] = useState<string>("10:00 AM - 12:00 PM");
   const [clientName, setClientName] = useState<string>("");
   const [clientPhone, setClientPhone] = useState<string>("");
   const [isBooked, setIsBooked] = useState<boolean>(false);
 
-  const matchedConsultant = CONSULTANTS.find((c) => c.dept === dept) || CONSULTANTS[0];
-
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!clientName || !clientPhone || !date) {
       alert("Please enter all required scheduling parameters.");
       return;
     }
 
-    saveCallbackRequest({
-      id: "CB-" + Math.floor(100000 + Math.random() * 900000),
-      name: clientName,
-      phone: clientPhone,
-      focusArea: matchedConsultant.role,
-      consultantName: matchedConsultant.name,
-      preferredDate: date,
-      timeSlot: time,
-      submittedAt: new Date().toISOString(),
-    });
+    setBookingLoading(true);
+
+    try {
+      const request = {
+        consultationFocusArea: dept,
+        meetingDate: date,
+        timeSlot: time,
+        fullName: clientName,
+        contactNumber: clientPhone,
+      };
+
+      const response = await submitTechnicalConsultation(request);
+
+      setBookingDetails({
+        ticketId: response.data.ticketId, // or response.data.id
+        name: clientName,
+        phone: clientPhone,
+        department: dept,
+        date,
+        time,
+      });
+
+      setIsBooked(true);;
+
+      // Reset form
+      setDept("RCC_STRUCTURAL_DESIGN");
+      setDate("");
+      setTime("10:00 AM - 12:00 PM");
+      setClientName("");
+      setClientPhone("");
+
+      console.log(response.data);
+
+    } catch (error: any) {
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message ??
+        "Unable to book the technical consultation."
+      );
+
+    } finally {
+      setBookingLoading(false);
+    }
 
     setIsBooked(true);
   };
@@ -68,15 +105,23 @@ export const MeetingScheduler: React.FC = () => {
   // Generate simple next 4 business days
   const getDates = () => {
     const list = [];
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
     for (let i = 1; i <= 5; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
-      if (d.getDay() !== 0) { // skip Sundays
-        const formatted = `${days[d.getDay()]}, ${d.getDate()} ${d.toLocaleString("default", { month: "short" })}`;
-        list.push(formatted);
+
+      if (d.getDay() !== 0) { // Skip Sunday
+        list.push({
+          value: d.toISOString().split("T")[0], // 2026-07-10
+          label: d.toLocaleDateString("en-IN", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+          }), // Sat, 10 Jul
+        });
       }
     }
+
     return list;
   };
 
@@ -111,19 +156,27 @@ export const MeetingScheduler: React.FC = () => {
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: "structural", label: "RCC Structural Design" },
-                    { id: "bim", label: "BIM / 3D Walkthrough" },
-                    { id: "compliance", label: "PWD & Statutory Compliance" }
+                    {
+                      id: "RCC_STRUCTURAL_DESIGN",
+                      label: "RCC Structural Design",
+                    },
+                    {
+                      id: "BIM_3D_WALKTHROUGH",
+                      label: "BIM / 3D Walkthrough",
+                    },
+                    {
+                      id: "PWD_STATUTORY_COMPLIANCE",
+                      label: "PWD & Statutory Compliance",
+                    },
                   ].map((dOption) => (
                     <button
                       type="button"
                       key={dOption.id}
                       onClick={() => setDept(dOption.id)}
-                      className={`p-3 rounded-xl border text-[11px] font-bold text-center leading-tight transition-all ${
-                        dept === dOption.id
-                          ? "border-brand-orange bg-orange-500/5 text-brand-orange"
-                          : "border-gray-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-gray-700 dark:text-gray-300"
-                      }`}
+                      className={`p-3 rounded-xl border text-[11px] font-bold text-center leading-tight transition-all ${dept === dOption.id
+                        ? "border-brand-orange bg-orange-500/5 text-brand-orange"
+                        : "border-gray-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-gray-700 dark:text-gray-300"
+                        }`}
                     >
                       {dOption.label}
                     </button>
@@ -144,8 +197,10 @@ export const MeetingScheduler: React.FC = () => {
                     className="w-full text-xs font-bold p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:border-brand-orange focus:outline-none text-gray-700 dark:text-gray-300"
                   >
                     <option value="">Select Date Option</option>
-                    {availableDates.map((dVal, i) => (
-                      <option key={i} value={dVal}>{dVal}</option>
+                    {availableDates.map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -159,10 +214,17 @@ export const MeetingScheduler: React.FC = () => {
                     onChange={(e) => setTime(e.target.value)}
                     className="w-full text-xs font-bold p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:border-brand-orange focus:outline-none text-gray-700 dark:text-gray-300"
                   >
-                    <option value="10:30 AM">10:30 AM (Morning Audit)</option>
-                    <option value="12:00 PM">12:00 PM (Noon Review)</option>
-                    <option value="3:30 PM">3:30 PM (Mid-Day Sync)</option>
-                    <option value="5:00 PM">5:00 PM (Late Briefing)</option>
+                    <option value="10:00 AM - 12:00 PM">
+                    10:00 AM - 12:00 PM
+                  </option>
+
+                  <option value="01:00 PM - 03:00 PM">
+                    01:00 PM - 03:00 PM
+                  </option>
+
+                  <option value="04:00 PM - 06:00 PM (Executive Hub)">
+                    04:00 PM - 06:00 PM (Executive Hub)
+                  </option>
                   </select>
                 </div>
               </div>
@@ -191,7 +253,15 @@ export const MeetingScheduler: React.FC = () => {
                     type="tel"
                     required
                     value={clientPhone}
-                    onChange={(e) => setClientPhone(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+
+                      if (value.length <= 10) {
+                        setClientPhone(value);
+                      }
+                    }}
+                    maxLength={10}
+                    pattern="[0-9]{10}"
                     placeholder="e.g. 9876543210"
                     className="w-full text-xs font-bold p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:border-brand-orange focus:outline-none text-gray-700 dark:text-gray-300"
                   />
@@ -202,7 +272,9 @@ export const MeetingScheduler: React.FC = () => {
                 type="submit"
                 className="w-full p-3.5 bg-brand-orange hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
               >
-                Confirm Technical Callback Slot
+                {bookingLoading
+                  ? "Booking..."
+                  : "Confirm Technical Callback Slot"}
               </button>
             </div>
 
@@ -230,12 +302,39 @@ export const MeetingScheduler: React.FC = () => {
               </div>
 
               <div className="space-y-1 text-gray-600 dark:text-gray-300">
-                <p><strong>CLIENT:</strong> {clientName}</p>
-                <p><strong>MOBILE:</strong> +91 {clientPhone}</p>
-                <p><strong>DEPT:</strong> {dept.toUpperCase()} AUDIT</p>
-                <p><strong>EXPERT:</strong> {matchedConsultant.name}</p>
-                <p><strong>DATE:</strong> {date}</p>
-                <p><strong>TIME:</strong> {time} IST</p>
+                <p><strong>CLIENT:</strong> {bookingDetails?.name}</p>
+
+                <p><strong>MOBILE:</strong> +91 {bookingDetails?.phone}</p>
+
+                <p>
+                  <strong>FOCUS AREA:</strong>{" "}
+                  {{
+                    RCC_STRUCTURAL_DESIGN: "RCC Structural Design",
+                    BIM_3D_WALKTHROUGH: "BIM / 3D Walkthrough",
+                    PWD_STATUTORY_COMPLIANCE: "PWD & Statutory Compliance",
+                  }[bookingDetails?.department] ?? bookingDetails?.department}
+                </p>
+
+                <p>
+                  <strong>DATE:</strong>{" "}
+                  {bookingDetails?.date
+                    ? new Date(bookingDetails.date).toLocaleDateString("en-IN", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                    : "-"}
+                </p>
+
+                <p>
+                  <strong>TIME:</strong>{" "}
+                  {{
+                    TEN_TO_TWELVE: "10:00 AM - 12:00 PM",
+                    ONE_TO_THREE: "01:00 PM - 03:00 PM",
+                    FOUR_TO_SIX: "04:00 PM - 06:00 PM",
+                  }[bookingDetails?.time] ?? bookingDetails?.time}
+                </p>
               </div>
 
               <div className="text-center pt-2 text-[9px] text-emerald-500 font-bold uppercase tracking-wider">
@@ -246,8 +345,7 @@ export const MeetingScheduler: React.FC = () => {
             <button
               onClick={() => {
                 setIsBooked(false);
-                setClientName("");
-                setClientPhone("");
+                setBookingDetails(null);
               }}
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
             >
