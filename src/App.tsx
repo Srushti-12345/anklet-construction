@@ -68,7 +68,6 @@ const WhyUsIcon = ({ name, className }: { name: string; className: string }) => 
 export default function App() {
   const [activeView, setActiveView] = React.useState<string>("home");
   const [contactTab, setContactTab] = React.useState<"quote" | "consult">("quote");
-  const [contactProjectType, setContactProjectType] = React.useState<string | undefined>(undefined);
   const [currentPath, setCurrentPath] = React.useState(() => window.location.pathname);
   const primaryPhoneNumber = "+917414938354";
   const primaryWhatsappNumber = "917414938354";
@@ -79,23 +78,6 @@ export default function App() {
 
     window.addEventListener("popstate", syncPath);
     return () => window.removeEventListener("popstate", syncPath);
-  }, []);
-
-  // Global handler: allow other components to request navigation to contact
-  React.useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent)?.detail || {};
-      const tab = detail.tab === "consult" ? "consult" : "quote";
-      const projectType = typeof detail.projectType === "string" ? detail.projectType : undefined;
-
-      setContactTab(tab);
-      setContactProjectType(projectType);
-      setActiveView("contact");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    window.addEventListener("anklet-set-contact-tab", handler as EventListener);
-    return () => window.removeEventListener("anklet-set-contact-tab", handler as EventListener);
   }, []);
 
   const navigateTo = (path: string) => {
@@ -132,7 +114,7 @@ export default function App() {
             className="w-full h-full object-cover"
           />
           {/* Glassmorphic Beautiful Dark Black Translucent Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-zinc-950/80 to-neutral-950/85 backdrop-blur-[3px]" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/70 via-zinc-950/80 to-neutral-950/85 backdrop-blur-[3px]" />
         </div>
 
         {/* Content Centered Container with pure layout */}
@@ -164,7 +146,7 @@ export default function App() {
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: "100px", opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="h-[2px] bg-gradient-to-r from-transparent via-brand-orange to-transparent mx-auto mt-3"
+              className="h-0.5 bg-linear-to-r from-transparent via-brand-orange to-transparent mx-auto mt-3"
             />
           </div>
 
@@ -244,8 +226,8 @@ export default function App() {
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover brightness-[0.55]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-zinc-950/60 to-transparent mix-blend-multiply" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-zinc-950/20" />
+                  <div className="absolute inset-0 bg-linear-to-r from-black/85 via-zinc-950/60 to-transparent mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/95 via-transparent to-zinc-950/20" />
                 </div>
 
                 {/* Ambient floating glowing orbs */}
@@ -272,7 +254,7 @@ export default function App() {
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
-                    className="absolute bottom-[30%] right-[10%] w-[450px] h-[450px] rounded-full bg-zinc-800/20 blur-[110px]"
+                    className="absolute bottom-[30%] right-[10%] w-112.5 h-112.5 rounded-full bg-zinc-800/20 blur-[110px]"
                   />
                 </div>
 
@@ -298,9 +280,9 @@ export default function App() {
                       className="text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight leading-[1.05] drop-shadow-xl"
                     >
                       Building <br className="hidden sm:inline" />
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange via-orange-400 to-white">
+                      <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-orange via-orange-400 to-white">
                         Tomorrow's Landmarks
-                      </span>{" "}
+                      </ span>{" "}
                       Today
                     </motion.h1>
 
@@ -365,11 +347,11 @@ export default function App() {
                 </div>
 
                 {/* Bottom transition curve */}
-                <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none overflow-hidden leading-none translate-y-[1px]">
+                <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none overflow-hidden leading-none translate-y-px">
                   <svg 
                     viewBox="0 0 1200 120" 
                     preserveAspectRatio="none" 
-                    className="relative block w-full h-[25px] sm:h-[40px] md:h-[55px] text-white dark:text-slate-950 fill-current"
+                    className="relative block w-full h-6.25 sm:h-10 md:h-13.75 text-white dark:text-slate-950 fill-current"
                   >
                     <path d="M0,0 Q600,40 1200,0 L1200,120 L0,120 Z" />
                   </svg>
@@ -405,7 +387,7 @@ export default function App() {
                     </div>
 
                     <div className="lg:col-span-5 relative">
-                      <div className="absolute -inset-1.5 bg-gradient-to-r from-brand-orange to-brand-navy rounded-2xl blur opacity-10" />
+                      <div className="absolute -inset-1.5 bg-linear-to-r from-brand-orange to-brand-navy rounded-2xl blur opacity-10" />
                       <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-video border border-gray-100 dark:border-slate-800">
                         <img
                           src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=600"
@@ -456,7 +438,7 @@ export default function App() {
                       <div key={i} className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700/50 flex flex-col h-full hover:shadow-md transition-all duration-300">
                         <div className="h-40 overflow-hidden relative">
                           <img src={srv.image} alt={srv.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
                         </div>
                         <div className="p-5 flex-1 flex flex-col justify-between">
                           <div>
@@ -521,7 +503,7 @@ export default function App() {
                     ].map((proj, i) => (
                       <div key={i} className="group relative bg-slate-900 rounded-2xl overflow-hidden aspect-video shadow-md cursor-pointer" onClick={() => setActiveView("projects")}>
                         <img src={proj.image} alt={proj.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/35 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/35 to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4 text-white">
                           <span className="text-[9px] font-black uppercase text-brand-orange tracking-widest">{proj.cat}</span>
                           <h4 className="text-xs sm:text-sm font-bold tracking-tight mt-0.5">{proj.title}</h4>
@@ -670,7 +652,7 @@ export default function App() {
                     </div>
 
                     <div className="lg:col-span-5 relative">
-                      <div className="absolute -inset-1.5 bg-gradient-to-r from-brand-orange to-brand-navy rounded-[2rem] blur opacity-10" />
+                      <div className="absolute -inset-1.5 bg-linear-to-r from-brand-orange to-brand-navy rounded-4xl blur opacity-10" />
                       <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-4/5 border border-gray-100 dark:border-slate-800">
                         <img
                           src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200"
@@ -746,6 +728,65 @@ export default function App() {
                 </div>
               </section>
 
+              {/* CORE LEADERSHIP SECTION */}
+              <section className="py-16 bg-white dark:bg-slate-950 border-b border-gray-150/10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange bg-orange-500/10 px-3 py-1 rounded-full inline-block">
+                      Core Board & Management
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-black font-display text-brand-navy dark:text-white tracking-tight">
+                      Senior Executive Leadership
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed">
+                      Our directors and chief engineering leads hold decades of collective industry credentials in heavy infrastructure and high-rise developments.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                      {
+                        name: "Er. Rajan Malhotra",
+                        role: "Chairman & Managing Director",
+                        desc: "With 30+ years of pioneering experience in heavy earthworks, mass-concrete masonry, and national transport layouts. Vets all core structural frameworks.",
+                        exp: "30+ Yrs Exp",
+                        img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400"
+                      },
+                      {
+                        name: "Ar. Shreya Joshi",
+                        role: "Executive Director of Architectural Systems",
+                        desc: "Directs ANKLET's luxurious architectural drafting, double-glazed facade design, and sustainable carbon-neutral spatial zoning standards.",
+                        exp: "B.Arch Principal",
+                        img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400"
+                      },
+                      {
+                        name: "Er. Amit Deshmukh",
+                        role: "Chief Structural Consultant",
+                        desc: "Certified Grade-I structural auditor. Oversees Building Information Modeling (BIM) collision logs, load-bearing stress evaluations, and seismic zoning checks.",
+                        exp: "M.Tech IIT Bombay",
+                        img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=400"
+                      }
+                    ].map((leader, i) => (
+                      <div key={i} className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-slate-700/50 flex flex-col hover:shadow-md transition-all duration-300">
+                        <div className="h-56 overflow-hidden relative">
+                          <img src={leader.img} alt={leader.name} className="w-full h-full object-cover object-top filter grayscale group-hover:grayscale-0 transition-all duration-500" />
+                          <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 to-transparent" />
+                          <span className="absolute bottom-3 right-3 bg-brand-orange text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                            {leader.exp}
+                          </span>
+                        </div>
+                        <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                          <div>
+                            <h3 className="text-sm font-black text-brand-navy dark:text-white tracking-wide">{leader.name}</h3>
+                            <p className="text-[11px] font-bold text-brand-orange uppercase tracking-wider mt-0.5">{leader.role}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed font-light">{leader.desc}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
 
               {/* STATUTORY LICENSING & REGULATORY COMPLIANCE */}
               <section className="py-16 bg-white dark:bg-slate-950">
@@ -994,7 +1035,7 @@ export default function App() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     <div className="lg:col-span-5 relative">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-brand-orange to-brand-navy rounded-[1.5rem] blur opacity-10" />
+                      <div className="absolute -inset-1 bg-linear-to-r from-brand-orange to-brand-navy rounded-3xl blur opacity-10" />
                       <div className="relative rounded-2xl overflow-hidden aspect-video shadow-lg border border-gray-100 dark:border-slate-800">
                         <img
                           src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=800"
@@ -1390,7 +1431,7 @@ export default function App() {
                         <div>
                           <div className="h-48 relative overflow-hidden">
                             <img src={caseStudy.bg} alt={caseStudy.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                            <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
                             <div className="absolute bottom-4 left-5 right-5">
                               <span className="text-[9px] font-black uppercase text-brand-orange bg-orange-500/10 px-2 py-0.5 rounded tracking-wide">
                                 {caseStudy.loc}
@@ -1441,7 +1482,7 @@ export default function App() {
               />
 
               {/* Message routing form */}
-              <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange bg-orange-500/10 px-3 py-1 rounded-full inline-block">
                     Inbound Registry
@@ -1454,14 +1495,14 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="w-full">
-                  <ContactForm activeTab={contactTab} setActiveTab={setContactTab} projectType={contactProjectType} />
+                <div className="max-w-4xl mx-auto">
+                  <ContactForm activeTab={contactTab} setActiveTab={setContactTab} />
                 </div>
               </section>
 
               {/* SCHEDULING INTERACTIVE CALENDAR SECTION */}
               <section className="py-16 bg-slate-50 dark:bg-slate-900 border-t border-b border-gray-150/10">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange bg-orange-500/10 px-3 py-1 rounded-full inline-block">
                       Direct Expert Access
@@ -1619,10 +1660,10 @@ export default function App() {
           className="group flex items-center bg-zinc-900/95 hover:bg-black border border-amber-500/30 hover:border-amber-500 text-white h-12 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 cursor-pointer p-3.5"
           id="floating-whatsapp-btn"
         >
-          <span className="max-w-0 opacity-0 group-hover:max-w-[150px] group-hover:opacity-100 group-hover:mr-2 transition-all duration-300 ease-out text-xs font-sans font-bold uppercase tracking-wider text-amber-500 whitespace-nowrap overflow-hidden">
+          <span className="max-w-0 opacity-0 group-hover:max-w-37.5 group-hover:opacity-100 group-hover:mr-2 transition-all duration-300 ease-out text-xs font-sans font-bold uppercase tracking-wider text-amber-500 whitespace-nowrap overflow-hidden">
             WhatsApp Chat
           </span>
-          <MessageSquare className="w-5 h-5 text-amber-500 group-hover:text-amber-400 flex-shrink-0" />
+          <MessageSquare className="w-5 h-5 text-amber-500 group-hover:text-amber-400 shrink-0" />
         </motion.a>
 
         {/* Call Us Button */}
@@ -1636,10 +1677,10 @@ export default function App() {
           className="group flex items-center bg-zinc-900/95 hover:bg-black border border-amber-500/30 hover:border-amber-500 text-white h-12 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 cursor-pointer p-3.5"
           id="floating-call-btn"
         >
-          <span className="max-w-0 opacity-0 group-hover:max-w-[150px] group-hover:opacity-100 group-hover:mr-2 transition-all duration-300 ease-out text-xs font-sans font-bold uppercase tracking-wider text-amber-500 whitespace-nowrap overflow-hidden">
+          <span className="max-w-0 opacity-0 group-hover:max-w-37.5 group-hover:opacity-100 group-hover:mr-2 transition-all duration-300 ease-out text-xs font-sans font-bold uppercase tracking-wider text-amber-500 whitespace-nowrap overflow-hidden">
             Call Direct
           </span>
-          <PhoneCall className="w-5 h-5 text-amber-500 group-hover:text-amber-400 flex-shrink-0" />
+          <PhoneCall className="w-5 h-5 text-amber-500 group-hover:text-amber-400 shrink-0" />
         </motion.a>
       </div>
     </div>

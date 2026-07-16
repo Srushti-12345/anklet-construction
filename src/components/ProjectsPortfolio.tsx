@@ -90,7 +90,7 @@ export const ProjectsPortfolio: React.FC<ProjectsPortfolioProps> = ({ onConsultN
               />
 
               {/* Luxury dark gradient overlay (revealed on hover or mobile) */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
 
               {/* Decorative Corner Accent */}
               <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
@@ -161,14 +161,14 @@ export const ProjectsPortfolio: React.FC<ProjectsPortfolioProps> = ({ onConsultN
               </button>
 
               {/* Left Side: High-Resolution Portfolio Photo (50% Width) */}
-              <div className="lg:w-1/2 relative h-60 lg:h-auto min-h-[300px] overflow-hidden">
+              <div className="lg:w-1/2 relative h-60 lg:h-auto min-h-75 overflow-hidden">
                 <img
                   src={selectedProject.imageUrl}
                   alt={selectedProject.title}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-slate-950/75 via-slate-950/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t lg:bg-linear-to-r from-slate-950/75 via-slate-950/20 to-transparent" />
                 
                 <div className="absolute bottom-6 left-6 right-6 z-10">
                   <span className="bg-brand-orange text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 inline-block">

@@ -6,6 +6,7 @@ import {
   FileText,
   LogOut,
   Mail,
+  Search,
   PhoneCall,
   Trash2,
   UserCircle2,
@@ -30,6 +31,7 @@ interface AdminDashboardProps {
 }
 
 type AdminPage = "quotes" | "consultations" | "callbacks";
+type TableStatusFilter = AdminRecordStatus | "all";
 
 type QuoteRow = QuoteRequest & { status: AdminRecordStatus };
 type ConsultationRow = ConsultationRequest & { status: AdminRecordStatus };
@@ -66,6 +68,7 @@ const STATUS_META: Record<AdminRecordStatus, { label: string; chip: string; sele
 };
 
 const statusLabel = (value: AdminRecordStatus) => STATUS_META[value].label;
+const statusFilterLabel = (value: TableStatusFilter) => (value === "all" ? "Filter" : statusLabel(value));
 
 const formatSubmittedAt = (value: string) => {
   const parsed = new Date(value);
@@ -86,9 +89,19 @@ const buildTelLink = (phone?: string) =>
   phone ? `tel:${phone.replace(/\s+/g, "")}` : "#";
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
-  const [quoteRows, setQuoteRows] = React.useState([]);
-  const [consultRows, setConsultRows] = React.useState([]);
-  const [callbackRows, setCallbackRows] = React.useState([]);
+  const [quoteRows, setQuoteRows] = React.useState<QuoteRow[]>(() => getQuoteRequests() as QuoteRow[]);
+  const [consultRows, setConsultRows] = React.useState<ConsultationRow[]>(() => getConsultationRequests() as ConsultationRow[]);
+  const [callbackRows, setCallbackRows] = React.useState<CallbackRow[]>(() => getCallbackRequests() as CallbackRow[]);
+  const [searchQueries, setSearchQueries] = React.useState<Record<AdminPage, string>>({
+    quotes: "",
+    consultations: "",
+    callbacks: "",
+  });
+  const [statusFilters, setStatusFilters] = React.useState<Record<AdminPage, TableStatusFilter>>({
+    quotes: "all",
+    consultations: "all",
+    callbacks: "all",
+  });
   const [selectedRecord, setSelectedRecord] = React.useState<SelectedRecord | null>(null);
   const [activePage, setActivePage] = React.useState<AdminPage>(() =>
     window.location.pathname.includes("consultations")
@@ -323,6 +336,75 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
 
   const activeRows =
     activePage === "quotes" ? quoteRows : activePage === "consultations" ? consultRows : callbackRows;
+  const activeSearchQuery = searchQueries[activePage];
+  const activeStatusFilter = statusFilters[activePage];
+
+  const filteredRows = React.useMemo(() => {
+    const query = activeSearchQuery.trim().toLowerCase();
+
+    if (activePage === "quotes") {
+      return quoteRows.filter((row) => {
+        const matchesStatus = activeStatusFilter === "all" || row.status === activeStatusFilter;
+        if (!matchesStatus) {
+          return false;
+        }
+
+        if (!query) {
+          return true;
+        }
+
+        return [
+          row.id,
+          row.name,
+          row.email,
+          row.phone,
+          row.projectType,
+          row.budget,
+          row.message,
+          statusLabel(row.status),
+        ].some((value) => value.toLowerCase().includes(query));
+      });
+    }
+
+    if (activePage === "consultations") {
+      return consultRows.filter((row) => {
+        const matchesStatus = activeStatusFilter === "all" || row.status === activeStatusFilter;
+        if (!matchesStatus) {
+          return false;
+        }
+
+        if (!query) {
+          return true;
+        }
+
+        return [
+          row.id,
+          row.name,
+          row.email,
+          row.phone,
+          row.preferredDate,
+          row.timeSlot,
+          row.message,
+          statusLabel(row.status),
+        ].some((value) => value.toLowerCase().includes(query));
+      });
+    }
+
+    return callbackRows.filter((row) => {
+      const matchesStatus = activeStatusFilter === "all" || row.status === activeStatusFilter;
+      if (!matchesStatus) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      return [row.id, row.name, row.phone, row.focusArea, row.preferredDate, row.timeSlot, statusLabel(row.status)].some(
+        (value) => value.toLowerCase().includes(query),
+      );
+    });
+  }, [activePage, activeSearchQuery, activeStatusFilter, quoteRows, consultRows, callbackRows]);
 
   const activeTitle =
     activePage === "quotes"
@@ -359,13 +441,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
       ? "Budget"
       : selectedRecord?.kind === "consultation"
         ? "Time Slot"
-        : "Consultant";
+        : "Schedule";
   const recordSecondaryValue = selectedRecord
     ? selectedRecord.kind === "quote"
       ? selectedRecord.data.estimatedProjectBudget
       : selectedRecord.kind === "consultation"
         ? selectedRecord.data.timeSlot
-        : selectedRecord.data.consultantName
+        : `${selectedRecord.data.preferredDate} at ${selectedRecord.data.timeSlot}`
     : "";
 
   const renderStatusSelect = (value: AdminRecordStatus, onChange: (status: AdminRecordStatus) => void) => (
@@ -551,8 +633,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             <RecordTable
               title="Quotes"
               icon={<FileText className="h-5 w-5 text-brand-orange" />}
-              rows={quoteRows}
-              emptyMessage="No quote responses yet."
+              rows={filteredRows as QuoteRow[]}
+              emptyMessage={
+                quoteRows.length === 0
+                  ? "No quote responses yet."
+                  : "No quote responses match your search or filter."
+              }
+              searchValue={searchQueries.quotes}
+              onSearchChange={(value) => setSearchQueries((state) => ({ ...state, quotes: value }))}
+              searchPlaceholder="Search quotes by client, scope, contact, or ID"
+              statusFilter={statusFilters.quotes}
+              onStatusFilterChange={(value) => setStatusFilters((state) => ({ ...state, quotes: value }))}
               columns={[
                 { label: "ID", className: "w-32" },
                 { label: "Client", className: "w-44" },
@@ -630,8 +721,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             <RecordTable
               title="Consultations"
               icon={<CalendarDays className="h-5 w-5 text-brand-orange" />}
-              rows={consultRows}
-              emptyMessage="No consultation responses yet."
+              rows={filteredRows as ConsultationRow[]}
+              emptyMessage={
+                consultRows.length === 0
+                  ? "No consultation responses yet."
+                  : "No consultation responses match your search or filter."
+              }
+              searchValue={searchQueries.consultations}
+              onSearchChange={(value) => setSearchQueries((state) => ({ ...state, consultations: value }))}
+              searchPlaceholder="Search consultations by client, schedule, contact, or ID"
+              statusFilter={statusFilters.consultations}
+              onStatusFilterChange={(value) => setStatusFilters((state) => ({ ...state, consultations: value }))}
               columns={[
                 { label: "ID", className: "w-32" },
                 { label: "Client", className: "w-44" },
@@ -713,8 +813,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             <RecordTable
               title="Callbacks"
               icon={<Clock3 className="h-5 w-5 text-brand-orange" />}
-              rows={callbackRows}
-              emptyMessage="No callback responses yet."
+              rows={filteredRows as CallbackRow[]}
+              emptyMessage={
+                callbackRows.length === 0
+                  ? "No callback responses yet."
+                  : "No callback responses match your search or filter."
+              }
+              searchValue={searchQueries.callbacks}
+              onSearchChange={(value) => setSearchQueries((state) => ({ ...state, callbacks: value }))}
+              searchPlaceholder="Search callbacks by client, focus, contact, or ID"
+              statusFilter={statusFilters.callbacks}
+              onStatusFilterChange={(value) => setStatusFilters((state) => ({ ...state, callbacks: value }))}
               columns={[
                 { label: "ID", className: "w-32" },
                 { label: "Client", className: "w-44" },
@@ -746,8 +855,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                   </td>
                   <td className="px-5 py-5">
                     <div className="space-y-1">
-                      <p className="font-semibold text-slate-950">{row.consultationFocusArea}</p>
-                      <p className="text-xs text-slate-500">{row.consultantName}</p>
+                      <p className="font-semibold text-slate-950">{row.focusArea}</p>
                     </div>
                   </td>
                   <td className="px-5 py-5">
@@ -856,25 +964,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                     {selectedRecord.kind === "quote"
                       ? selectedRecord.data.projectVisionScopeSpecifications || "No project notes provided."
                       : selectedRecord.kind === "consultation"
-                        ? selectedRecord.data.consultationTopic || "No consultation notes provided."
-                        : `${selectedRecord.data.consultationFocusArea} on ${selectedRecord.data.meetingDate} at ${selectedRecord.data.timeSlot}.`}
+                        ? selectedRecord.data.message || "No consultation notes provided."
+                        : `${selectedRecord.data.focusArea} scheduled for ${selectedRecord.data.preferredDate} at ${selectedRecord.data.timeSlot}.`}
                   </p>
                 </div>
               </div>
 
               <div className="grid content-start gap-3">
                 <InfoTile label={recordSecondaryLabel} value={recordSecondaryValue} />
-
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Request Summary</p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                    {selectedRecord.kind === "quote"
-                      ? "Quote review item ready for follow-up, pricing confirmation, and scope clarification."
-                      : selectedRecord.kind === "consultation"
-                        ? "Consultation booking ready for scheduling confirmation and client outreach."
-                        : "Callback request ready for outreach and scheduling confirmation."}
-                  </p>
-                </div>
 
                 <div className="grid gap-2.5">
                   {selectedRecord.kind !== "callback" && (
@@ -916,6 +1013,11 @@ type RecordTableProps<T extends { id: string; status: AdminRecordStatus }> = {
   icon: React.ReactNode;
   rows: T[];
   emptyMessage: string;
+  searchValue: string;
+  searchPlaceholder: string;
+  onSearchChange: (value: string) => void;
+  statusFilter: TableStatusFilter;
+  onStatusFilterChange: (value: TableStatusFilter) => void;
   columns: Array<{ label: string; className: string }>;
   renderRow: (row: T) => React.ReactNode;
   onRowClick: (row: T) => void;
@@ -927,13 +1029,16 @@ const RecordTable = <T extends { id: string; status: AdminRecordStatus }>({
   icon,
   rows,
   emptyMessage,
+  searchValue,
+  searchPlaceholder,
+  onSearchChange,
+  statusFilter,
+  onStatusFilterChange,
   columns,
   renderRow,
   onRowClick,
   onRowKeyDown,
 }: RecordTableProps<T>) => {
-  const count = rows.length;
-
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -944,9 +1049,35 @@ const RecordTable = <T extends { id: string; status: AdminRecordStatus }>({
             <p className="text-sm text-slate-500">Open a detailed record view by selecting any row.</p>
           </div>
         </div>
-        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.25em] text-slate-500">
-          {count} records
-        </span>
+      </div>
+
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <label className="relative flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="search"
+            value={searchValue}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={searchPlaceholder}
+            className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10"
+          />
+        </label>
+
+        <div className="relative w-full lg:w-56">
+          <select
+            value={statusFilter}
+            onChange={(event) => onStatusFilterChange(event.target.value as TableStatusFilter)}
+            className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-11 text-sm font-semibold text-slate-900 shadow-sm outline-none transition-colors focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10"
+          >
+            <option value="all">Filter by status</option>
+            {RECORD_STATUS_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {statusFilterLabel(option)}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
