@@ -51,16 +51,16 @@ const writeJson = (key: string, value: unknown) => {
   window.localStorage.setItem(key, JSON.stringify(value));
 };
 
-// const seedIfEmpty = <T,>(key: string, seedValue: T[]) => {
-//   if (typeof window === "undefined") {
-//     return;
-//   }
+const seedIfEmpty = <T,>(key: string, seedValue: T[]) => {
+  if (typeof window === "undefined") {
+    return;
+  }
 
-//   const current = readJson<T[]>(key, []);
-//   if (current.length === 0) {
-//     writeJson(key, seedValue);
-//   }
-// };
+  const current = readJson<T[]>(key, []);
+  if (current.length === 0) {
+    writeJson(key, seedValue);
+  }
+};
 
 const normalizeRecordArray = <T extends { status?: AdminRecordStatus }>(records: T[]) =>
   records.map((record) => ({
@@ -134,7 +134,7 @@ export const signupAdmin = ({ name, email, password }: { name: string; email: st
 
   saveAdminAccounts([newAccount, ...accounts]);
   setAdminSession({
-    name: newAccount.name,
+    fullName: newAccount.name,
     email: newAccount.email,
     signedInAt: new Date().toISOString(),
   });
@@ -152,10 +152,9 @@ export const loginAdmin = ({ email, password }: { email: string; password: strin
   }
 
   setAdminSession({
-    fullName: account.fullName,
+    fullName: account.name,
     email: account.email,
     signedInAt: new Date().toISOString(),
-
   });
 
   return { ok: true as const, account };
@@ -165,3 +164,7 @@ export const logoutAdmin = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("admin");
 };
+
+export const getQuoteRequests = () => readNormalisedRecords<QuoteRequest>("quotes", []);
+export const getConsultationRequests = () => readNormalisedRecords<ConsultationRequest>("consultations", []);
+export const getCallbackRequests = () => readNormalisedRecords<CallbackRequest>("callbacks", []);

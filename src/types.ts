@@ -46,36 +46,53 @@ export interface WhyChooseUsItem {
 
 export interface QuoteRequest {
   id: string;
+  quoteId: string;
   name: string;
+  fullName: string;
   email: string;
+  emailAddress: string;
   phone: string;
+  contactNumber: string;
   projectType: string;
+  projectClassification: string;
   budget: string;
+  estimatedProjectBudget: string;
   message: string;
+  projectVisionScopeSpecifications: string;
   submittedAt: string;
-  status?: "new" | "contacted" | "completed" | "closed";
+  status?: "NEW" | "CONTACTED" | "COMPLETED" | "CLOSED";
 }
 
 export interface ConsultationRequest {
   id: string;
+  consultationId: string;
   name: string;
+  fullName: string;
   email: string;
+  emailAddress: string;
   phone: string;
+  contactNumber: string;
   preferredDate: string;
   timeSlot: string;
   message: string;
+  consultationTopic: string;
   submittedAt: string;
-  status?: "new" | "contacted" | "completed" | "closed";
+  status?: "NEW" | "CONTACTED" | "COMPLETED" | "CLOSED";
 }
 
 export interface CallbackRequest {
   id: string;
+  technicalConsultationId: string;
   name: string;
+  fullName: string;
   phone: string;
+  contactNumber: string;
   focusArea: string;
-  consultantName: string;
+  consultationFocusArea: string;
+  consultantName?: string;
   preferredDate: string;
+  meetingDate?: string;
   timeSlot: string;
   submittedAt: string;
-  status?: "new" | "contacted" | "completed" | "closed";
+  status?: "NEW" | "CONTACTED" | "COMPLETED" | "CLOSED";
 }
